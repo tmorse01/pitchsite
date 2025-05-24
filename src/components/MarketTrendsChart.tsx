@@ -1,5 +1,6 @@
-import { Paper, Title, Text, Stack, SimpleGrid } from "@mantine/core";
+import { Paper, Title, Text, Stack, SimpleGrid, Group } from "@mantine/core";
 import { LineChart } from "@mantine/charts";
+import { IconHome, IconTrendingUp, IconPercentage } from "@tabler/icons-react";
 
 interface MarketTrendsData {
   priceTrends: Array<{
@@ -38,12 +39,14 @@ export default function MarketTrendsChart({ data }: MarketTrendsChartProps) {
         </Text>
 
         <SimpleGrid cols={{ base: 1, lg: 3 }} spacing="lg">
-          {" "}
           {/* Median Home Prices */}
           <Stack gap="sm">
-            <Text fw={600} size="sm">
-              Median Home Prices (5-Year)
-            </Text>
+            <Group gap="xs">
+              <IconHome size={16} color="var(--mantine-color-indigo-6)" />
+              <Text fw={600} size="sm">
+                Median Home Prices (5-Year)
+              </Text>
+            </Group>
             <LineChart
               h={250}
               data={data.priceTrends}
@@ -57,9 +60,15 @@ export default function MarketTrendsChart({ data }: MarketTrendsChartProps) {
           </Stack>
           {/* Rent Growth */}
           <Stack gap="sm">
-            <Text fw={600} size="sm">
-              Annual Rent Growth
-            </Text>
+            <Group gap="xs">
+              <IconTrendingUp
+                size={16}
+                color="var(--mantine-color-emerald-6)"
+              />
+              <Text fw={600} size="sm">
+                Annual Rent Growth
+              </Text>
+            </Group>
             <LineChart
               h={250}
               data={data.priceTrends}
@@ -73,9 +82,12 @@ export default function MarketTrendsChart({ data }: MarketTrendsChartProps) {
           </Stack>
           {/* Cap Rates */}
           <Stack gap="sm">
-            <Text fw={600} size="sm">
-              Cap Rate Trends
-            </Text>
+            <Group gap="xs">
+              <IconPercentage size={16} color="var(--mantine-color-orange-6)" />
+              <Text fw={600} size="sm">
+                Cap Rate Trends
+              </Text>
+            </Group>
             <LineChart
               h={250}
               data={data.priceTrends}

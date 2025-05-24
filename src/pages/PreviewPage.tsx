@@ -268,7 +268,7 @@ export default function PreviewPage() {
       <Group justify="center" mt="xl">
         <Button variant="default" onClick={() => navigate("/create")}>
           Create Another Deck
-        </Button>{" "}
+        </Button>
         <Button variant="filled" onClick={() => navigate("/")}>
           Back to Home
         </Button>

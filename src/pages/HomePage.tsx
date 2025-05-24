@@ -70,7 +70,7 @@ export default function HomePage() {
                 potential investors
               </Text>
             </Stack>
-          </Paper>{" "}
+          </Paper>
         </Group>
       </Stack>
     </Stack>
