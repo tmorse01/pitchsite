@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import {
-  Container,
   Title,
   Text,
   Button,
@@ -60,19 +59,13 @@ export default function PreviewPage() {
       minimumFractionDigits: 0,
     }).format(amount);
   };
-
   if (!pitchData) {
-    return (
-      <Container size="md" py="xl">
-        <Text ta="center">Loading...</Text>
-      </Container>
-    );
+    return <Text ta="center">Loading...</Text>;
   }
 
   const { formData, generatedContent } = pitchData;
-
   return (
-    <Container size="lg" py="xl">
+    <>
       {/* Hero Section */}
       <Paper shadow="sm" p="xl" radius="md" mb="xl" bg="indigo.0">
         <Stack gap="md" align="center" ta="center">
@@ -236,11 +229,11 @@ export default function PreviewPage() {
       <Group justify="center" mt="xl">
         <Button variant="default" onClick={() => navigate("/create")}>
           Create Another Deck
-        </Button>
+        </Button>{" "}
         <Button variant="filled" onClick={() => navigate("/")}>
           Back to Home
         </Button>
       </Group>
-    </Container>
+    </>
   );
 }

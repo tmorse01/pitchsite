@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  Container,
   Title,
   Text,
   Button,
@@ -58,32 +57,24 @@ export default function SharePage() {
       minimumFractionDigits: 0,
     }).format(amount);
   };
-
   if (loading) {
-    return (
-      <Container size="md" py="xl">
-        <Text ta="center">Loading...</Text>
-      </Container>
-    );
+    return <Text ta="center">Loading...</Text>;
   }
 
   if (!pitchData) {
     return (
-      <Container size="md" py="xl">
-        <Alert color="red" title="Deck Not Found">
-          <Text>This pitch deck could not be found or may have expired.</Text>
-          <Button mt="md" onClick={() => navigate("/")}>
-            Go to Homepage
-          </Button>
-        </Alert>
-      </Container>
+      <Alert color="red" title="Deck Not Found">
+        <Text>This pitch deck could not be found or may have expired.</Text>
+        <Button mt="md" onClick={() => navigate("/")}>
+          Go to Homepage
+        </Button>
+      </Alert>
     );
   }
 
   const { formData, generatedContent } = pitchData;
-
   return (
-    <Container size="lg" py="xl">
+    <>
       {/* Shared Deck Header */}
       <Paper shadow="sm" p="md" radius="md" mb="xl" bg="blue.0">
         <Group justify="space-between" align="center">
@@ -260,7 +251,7 @@ export default function SharePage() {
       <Box mt="xl" pt="xl" style={{ borderTop: "1px solid #e9ecef" }}>
         <Group justify="center">
           <Text size="sm" c="dimmed">
-            Powered by PitchSite -
+            Powered by PitchSite - Made by Taylor Morse
           </Text>
           <Button
             variant="subtle"
@@ -271,6 +262,6 @@ export default function SharePage() {
           </Button>
         </Group>
       </Box>
-    </Container>
+    </>
   );
 }

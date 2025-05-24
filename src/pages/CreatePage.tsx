@@ -1,6 +1,5 @@
 import { useState } from "react";
 import {
-  Container,
   Title,
   Stepper,
   Button,
@@ -124,140 +123,129 @@ export default function CreatePage() {
       alert(`API Test Failed: ${error}`);
     }
   };
-
   return (
-    <Container size="md" py="xl">
-      <Paper shadow="sm" p="xl" radius="md">
-        <Stack gap="xl">
-          {" "}
-          <Title order={1} ta="center" c="indigo">
-            Create Your Pitch Deck
-          </Title>
-          <Group justify="center">
-            <Button variant="outline" size="xs" onClick={handleTestApi}>
-              Test API Connection
+    <Paper shadow="sm" p="xl" radius="md" maw={800} mx="auto">
+      <Stack gap="xl">
+        <Title order={1} ta="center" c="indigo">
+          Create Your Pitch Deck
+        </Title>
+        <Group justify="center">
+          <Button variant="outline" size="xs" onClick={handleTestApi}>
+            Test API Connection
+          </Button>
+        </Group>
+        <Stepper active={active}>
+          <Stepper.Step label="Project Details" description="Basic information">
+            <Stack gap="md" mt="xl">
+              <TextInput
+                label="Project Name"
+                placeholder="Enter project name"
+                {...form.getInputProps("projectName")}
+              />
+              <TextInput
+                label="Address"
+                placeholder="Enter property address"
+                {...form.getInputProps("address")}
+              />
+              <Select
+                label="Investment Type"
+                placeholder="Select investment type"
+                data={[
+                  "Multifamily",
+                  "Single Family Flip",
+                  "Commercial",
+                  "Development",
+                  "Industrial",
+                  "Mixed Use",
+                ]}
+                {...form.getInputProps("investmentType")}
+              />
+            </Stack>
+          </Stepper.Step>
+
+          <Stepper.Step
+            label="Financial Details"
+            description="Investment metrics"
+          >
+            <Stack gap="md" mt="xl">
+              <NumberInput
+                label="Purchase Price"
+                placeholder="Enter purchase price"
+                min={0}
+                thousandSeparator=","
+                prefix="$"
+                {...form.getInputProps("purchasePrice")}
+              />
+              <NumberInput
+                label="Total Raise"
+                placeholder="Enter total equity raise amount"
+                min={0}
+                thousandSeparator=","
+                prefix="$"
+                {...form.getInputProps("totalRaise")}
+              />
+              <TextInput
+                label="Target IRR"
+                placeholder="e.g., 18%"
+                {...form.getInputProps("targetIrr")}
+              />
+              <TextInput
+                label="Hold Period"
+                placeholder="e.g., 5 years"
+                {...form.getInputProps("holdPeriod")}
+              />
+            </Stack>
+          </Stepper.Step>
+
+          <Stepper.Step label="Additional Info" description="Details and bio">
+            <Stack gap="md" mt="xl">
+              <Textarea
+                label="Project Description (Optional)"
+                placeholder="Describe the project, target market, strategy..."
+                rows={4}
+                {...form.getInputProps("description")}
+              />
+              <Textarea
+                label="Sponsor Bio"
+                placeholder="Brief bio of the sponsor/team..."
+                rows={4}
+                {...form.getInputProps("sponsorBio")}
+              />
+              <FileInput
+                label="Property Image (Optional)"
+                placeholder="Upload an image"
+                accept="image/*"
+                {...form.getInputProps("image")}
+              />
+            </Stack>
+          </Stepper.Step>
+
+          <Stepper.Completed>
+            <Stack gap="md" mt="xl" align="center">
+              <Text size="lg" ta="center">
+                Ready to generate your AI-powered pitch deck!
+              </Text>
+              <Text size="sm" c="dimmed" ta="center" maw={400}>
+                Click "Generate Pitch Deck" to create your professional
+                presentation
+              </Text>
+            </Stack>
+          </Stepper.Completed>
+        </Stepper>
+        <Group justify="space-between" mt="xl">
+          <Button variant="default" onClick={prevStep} disabled={active === 0}>
+            Back
+          </Button>
+
+          {active < 3 ? (
+            <Button onClick={nextStep}>Next step</Button>
+          ) : (
+            <Button onClick={handleSubmit} loading={loading}>
+              Generate Pitch Deck
             </Button>
-          </Group>
-          <Stepper active={active}>
-            <Stepper.Step
-              label="Project Details"
-              description="Basic information"
-            >
-              <Stack gap="md" mt="xl">
-                <TextInput
-                  label="Project Name"
-                  placeholder="Enter project name"
-                  {...form.getInputProps("projectName")}
-                />
-                <TextInput
-                  label="Address"
-                  placeholder="Enter property address"
-                  {...form.getInputProps("address")}
-                />
-                <Select
-                  label="Investment Type"
-                  placeholder="Select investment type"
-                  data={[
-                    "Multifamily",
-                    "Single Family Flip",
-                    "Commercial",
-                    "Development",
-                    "Industrial",
-                    "Mixed Use",
-                  ]}
-                  {...form.getInputProps("investmentType")}
-                />
-              </Stack>
-            </Stepper.Step>
-
-            <Stepper.Step
-              label="Financial Details"
-              description="Investment metrics"
-            >
-              <Stack gap="md" mt="xl">
-                <NumberInput
-                  label="Purchase Price"
-                  placeholder="Enter purchase price"
-                  min={0}
-                  thousandSeparator=","
-                  prefix="$"
-                  {...form.getInputProps("purchasePrice")}
-                />
-                <NumberInput
-                  label="Total Raise"
-                  placeholder="Enter total equity raise amount"
-                  min={0}
-                  thousandSeparator=","
-                  prefix="$"
-                  {...form.getInputProps("totalRaise")}
-                />
-                <TextInput
-                  label="Target IRR"
-                  placeholder="e.g., 18%"
-                  {...form.getInputProps("targetIrr")}
-                />
-                <TextInput
-                  label="Hold Period"
-                  placeholder="e.g., 5 years"
-                  {...form.getInputProps("holdPeriod")}
-                />
-              </Stack>
-            </Stepper.Step>
-
-            <Stepper.Step label="Additional Info" description="Details and bio">
-              <Stack gap="md" mt="xl">
-                <Textarea
-                  label="Project Description (Optional)"
-                  placeholder="Describe the project, target market, strategy..."
-                  rows={4}
-                  {...form.getInputProps("description")}
-                />
-                <Textarea
-                  label="Sponsor Bio"
-                  placeholder="Brief bio of the sponsor/team..."
-                  rows={4}
-                  {...form.getInputProps("sponsorBio")}
-                />
-                <FileInput
-                  label="Property Image (Optional)"
-                  placeholder="Upload an image"
-                  accept="image/*"
-                  {...form.getInputProps("image")}
-                />
-              </Stack>
-            </Stepper.Step>
-
-            <Stepper.Completed>
-              <Stack gap="md" mt="xl" align="center">
-                <Text size="lg" ta="center">
-                  Ready to generate your AI-powered pitch deck!
-                </Text>
-                <Text size="sm" c="dimmed" ta="center" maw={400}>
-                  Click "Generate Pitch Deck" to create your professional
-                  presentation
-                </Text>
-              </Stack>
-            </Stepper.Completed>
-          </Stepper>
-          <Group justify="space-between" mt="xl">
-            <Button
-              variant="default"
-              onClick={prevStep}
-              disabled={active === 0}
-            >
-              Back
-            </Button>
-
-            {active < 3 ? (
-              <Button onClick={nextStep}>Next step</Button>
-            ) : (
-              <Button onClick={handleSubmit} loading={loading}>
-                Generate Pitch Deck
-              </Button>
-            )}
-          </Group>
-        </Stack>
-      </Paper>
-    </Container>
+          )}
+        </Group>{" "}
+      </Stack>
+    </Paper>
   );
 }
