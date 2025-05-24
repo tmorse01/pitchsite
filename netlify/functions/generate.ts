@@ -1,4 +1,10 @@
 import type { Handler, HandlerEvent, HandlerContext } from "@netlify/functions";
+import OpenAI from "openai";
+import dotenv from "dotenv";
+import path from "path";
+
+// Load environment variables from .env file
+dotenv.config({ path: path.resolve(process.cwd(), ".env") });
 
 interface RequestBody {
   projectName: string;
@@ -12,6 +18,11 @@ interface RequestBody {
   sponsorBio: string;
   tone?: string;
 }
+
+// Initialize OpenAI client
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY || "",
+});
 
 const handler: Handler = async (
   event: HandlerEvent,
@@ -41,19 +52,41 @@ const handler: Handler = async (
       body: JSON.stringify({ error: "Method Not Allowed" }),
     };
   }
-
   try {
-    const body: RequestBody = JSON.parse(event.body || "{}"); // Simulate AI generation with realistic content
-    const response = {
-      executiveSummary: generateExecutiveSummary(body),
-      investmentThesis: generateInvestmentThesis(body),
-      riskFactors: generateRiskFactors(body),
-      locationOverview: generateLocationOverview(body),
-      locationSnapshot: generateLocationSnapshot(body),
-      sponsorBio: generateSponsorBio(body),
-      comparableProperties: generateComparableProperties(body),
-      marketTrends: generateMarketTrends(body),
-    };
+    const body: RequestBody = JSON.parse(event.body || "{}");
+
+    // Debug logging for API key
+    console.log("API Key present:", !!process.env.OPENAI_API_KEY);
+    console.log("API Key length:", process.env.OPENAI_API_KEY?.length || 0);
+    console.log(
+      "API Key starts with:",
+      process.env.OPENAI_API_KEY?.substring(0, 7)
+    );
+
+    // Check if OpenAI API key is available
+    if (!process.env.OPENAI_API_KEY) {
+      console.warn("OpenAI API key not found, using fallback generation");
+      // Fall back to hardcoded content if no API key
+      const response = {
+        executiveSummary: generateExecutiveSummaryFallback(body),
+        investmentThesis: generateInvestmentThesisFallback(body),
+        riskFactors: generateRiskFactorsFallback(body),
+        locationOverview: generateLocationOverviewFallback(body),
+        locationSnapshot: generateLocationSnapshotFallback(body),
+        sponsorBio: generateSponsorBioFallback(body),
+        comparableProperties: generateComparableProperties(body),
+        marketTrends: generateMarketTrends(body),
+      };
+
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify(response),
+      };
+    }
+
+    // Generate AI content using OpenAI
+    const response = await generateAIContent(body);
 
     return {
       statusCode: 200,
@@ -70,7 +103,7 @@ const handler: Handler = async (
   }
 };
 
-function generateExecutiveSummary(data: RequestBody): string {
+function generateExecutiveSummaryFallback(data: RequestBody): string {
   const {
     projectName,
     investmentType,
@@ -97,14 +130,14 @@ function generateExecutiveSummary(data: RequestBody): string {
   )} in equity capital to execute a ${holdPeriod} business plan targeting a ${targetIrr} IRR. The investment strategy focuses on value creation through strategic improvements and market positioning, leveraging current market conditions and the sponsor's proven track record in similar investments.`;
 }
 
-function generateInvestmentThesis(data: RequestBody): string {
+function generateInvestmentThesisFallback(data: RequestBody): string {
   const { investmentType, address } = data;
   const location = address.split(",").pop()?.trim() || "the target market";
 
   return `This ${investmentType.toLowerCase()} investment capitalizes on strong fundamentals in ${location}, including population growth, job creation, and limited new supply. The property's strategic location provides excellent access to major employment centers and transportation corridors. Our value-add strategy will enhance the asset's competitive position while generating stable cash flow and long-term appreciation for investors.`;
 }
 
-function generateRiskFactors(data: RequestBody): string[] {
+function generateRiskFactorsFallback(data: RequestBody): string[] {
   const baseRisks = [
     "Interest rate volatility and financing market conditions",
     "Local market economic downturns affecting demand",
@@ -126,14 +159,14 @@ function generateRiskFactors(data: RequestBody): string[] {
   return baseRisks.slice(0, 5);
 }
 
-function generateLocationOverview(data: RequestBody): string {
+function generateLocationOverviewFallback(data: RequestBody): string {
   const { address } = data;
   const location = address.split(",").pop()?.trim() || "the target location";
 
   return `${location} is experiencing robust economic growth driven by diverse industry sectors and population expansion. The area benefits from excellent infrastructure, including major highways, public transportation, and proximity to key employment centers. Recent developments in the region have attracted both businesses and residents, creating a strong foundation for real estate investment returns. The local market demonstrates resilience and continues to show positive trends in both rental rates and property values.`;
 }
 
-function generateLocationSnapshot(data: RequestBody): string {
+function generateLocationSnapshotFallback(data: RequestBody): string {
   const { address, tone = "Professional" } = data;
   const location = address.split(",").pop()?.trim() || "the target location";
 
@@ -211,7 +244,7 @@ function generateMarketTrends(data: RequestBody) {
   };
 }
 
-function generateSponsorBio(data: RequestBody): string {
+function generateSponsorBioFallback(data: RequestBody): string {
   const originalBio = data.sponsorBio;
 
   // Enhance the provided bio with professional language
@@ -224,6 +257,143 @@ function formatCurrency(amount: number): string {
     currency: "USD",
     minimumFractionDigits: 0,
   }).format(amount);
+}
+
+// AI Content Generation using OpenAI
+async function generateAIContent(data: RequestBody) {
+  const {
+    projectName,
+    address,
+    investmentType,
+    purchasePrice,
+    equityRaise,
+    targetIrr,
+    holdPeriod,
+    description,
+    sponsorBio,
+    tone = "Professional",
+  } = data;
+
+  const location = address.split(",").pop()?.trim() || "the target location";
+
+  try {
+    // Create a comprehensive prompt for GPT
+    const prompt = `
+You are a professional real estate investment analyst. Generate content for an investment pitch deck with the following details:
+
+Project: ${projectName}
+Address: ${address}
+Investment Type: ${investmentType}
+Purchase Price: ${formatCurrency(purchasePrice)}
+Equity Raise: ${formatCurrency(equityRaise)}
+Target IRR: ${targetIrr}
+Hold Period: ${holdPeriod}
+Description: ${description}
+Sponsor Bio: ${sponsorBio}
+Content Tone: ${tone}
+
+Please provide the following sections in JSON format:
+
+1. executiveSummary: A compelling 3-4 sentence executive summary in a ${tone.toLowerCase()} tone
+2. investmentThesis: A detailed investment thesis (3-4 sentences) explaining why this is a good investment
+3. locationOverview: A professional overview of ${location} focusing on real estate demand, population growth, and economic development (3-4 sentences)
+4. locationSnapshot: A ${tone.toLowerCase()} location analysis highlighting growth metrics and demographic trends (3-4 sentences)
+5. enhancedSponsorBio: Enhance the provided sponsor bio with professional language (keep original content but make it more compelling)
+6. riskFactors: Array of 5 relevant risk factors for this type of investment
+7. comparableProperties: Array of 3 comparable properties with realistic addresses, prices around ${formatCurrency(
+      purchasePrice
+    )}, distances, and notes
+
+Return only a valid JSON object with these fields. Do not wrap the response in markdown code blocks or any other formatting - return raw JSON only.`;
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a professional real estate investment analyst. Provide detailed, accurate, and compelling investment analysis content. Always return valid JSON without markdown formatting or code blocks.",
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+      max_tokens: 1500,
+      temperature: 0.7,
+    });
+    const aiResponse = completion.choices[0]?.message?.content;
+    if (!aiResponse) {
+      throw new Error("No response from OpenAI");
+    } // Extract JSON from markdown code blocks if present
+    let jsonString = aiResponse;
+    const jsonMatch = aiResponse.match(/```json\s*([\s\S]*?)\s*```/);
+    if (jsonMatch) {
+      jsonString = jsonMatch[1];
+    } else {
+      // Try to find JSON block without language specification
+      const codeMatch = aiResponse.match(/```\s*([\s\S]*?)\s*```/);
+      if (codeMatch) {
+        jsonString = codeMatch[1];
+      }
+    }
+
+    // Clean up the JSON string
+    jsonString = jsonString.trim();
+
+    // Parse the AI response
+    let aiContent;
+    try {
+      aiContent = JSON.parse(jsonString);
+    } catch (parseError) {
+      console.error("JSON Parse Error:", parseError);
+      console.error("Raw AI Response:", aiResponse);
+      console.error("Extracted JSON String:", jsonString);
+      throw new Error(`Failed to parse AI response as JSON: ${parseError}`);
+    }
+
+    // Combine AI content with generated data
+    return {
+      executiveSummary:
+        aiContent.executiveSummary || generateExecutiveSummaryFallback(data),
+      investmentThesis:
+        aiContent.investmentThesis || generateInvestmentThesisFallback(data),
+      riskFactors: aiContent.riskFactors || generateRiskFactorsFallback(data),
+      locationOverview:
+        aiContent.locationOverview || generateLocationOverviewFallback(data),
+      locationSnapshot:
+        aiContent.locationSnapshot || generateLocationSnapshotFallback(data),
+      sponsorBio:
+        aiContent.enhancedSponsorBio || generateSponsorBioFallback(data),
+      comparableProperties:
+        aiContent.comparableProperties || generateComparableProperties(data),
+      marketTrends: generateMarketTrends(data), // Keep the existing market trends generation
+    };
+  } catch (error) {
+    console.error("Error generating AI content:", error);
+
+    // Check if it's an authentication error
+    if (
+      error instanceof Error &&
+      (error.message.includes("401") ||
+        error.message.includes("Incorrect API key"))
+    ) {
+      console.warn(
+        "OpenAI authentication failed, falling back to hardcoded content"
+      );
+    }
+
+    // Fall back to hardcoded content if AI fails
+    return {
+      executiveSummary: generateExecutiveSummaryFallback(data),
+      investmentThesis: generateInvestmentThesisFallback(data),
+      riskFactors: generateRiskFactorsFallback(data),
+      locationOverview: generateLocationOverviewFallback(data),
+      locationSnapshot: generateLocationSnapshotFallback(data),
+      sponsorBio: generateSponsorBioFallback(data),
+      comparableProperties: generateComparableProperties(data),
+      marketTrends: generateMarketTrends(data),
+    };
+  }
 }
 
 export { handler };
