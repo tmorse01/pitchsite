@@ -10,7 +10,7 @@ import {
   Badge,
 } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
-// import MarketTrendsChart from "../components/MarketTrendsChart";
+import MarketTrendsChart from "../components/MarketTrendsChart";
 import ComparableProperties from "../components/ComparableProperties";
 import LocationMap from "../components/LocationMap";
 import ROISimulator from "../components/ROISimulator";
@@ -187,7 +187,7 @@ export default function PreviewPage() {
               </Stack>
             </Stack>
           </Paper>
-        </SimpleGrid>{" "}
+        </SimpleGrid>
         {/* Location & Risk Factors */}
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl">
           <Paper shadow="sm" p="xl" radius="md">
@@ -226,7 +226,7 @@ export default function PreviewPage() {
         {/* Location Map with Zillow Links */}
         <LocationMap address={formData.address} />
         {/* Market Trends Analysis */}
-        {/* <MarketTrendsChart data={generatedContent.marketTrends} /> */}
+        <MarketTrendsChart data={generatedContent.marketTrends} />
         {/* Comparable Properties */}
         <ComparableProperties
           properties={generatedContent.comparableProperties}

@@ -12,7 +12,7 @@ import {
   Box,
   Alert,
 } from "@mantine/core";
-// import MarketTrendsChart from "../components/MarketTrendsChart";
+import MarketTrendsChart from "../components/MarketTrendsChart";
 import ComparableProperties from "../components/ComparableProperties";
 import LocationMap from "../components/LocationMap";
 import ROISimulator from "../components/ROISimulator";
@@ -252,7 +252,7 @@ export default function SharePage() {
         {/* Location Map with Zillow Links */}
         <LocationMap address={formData.address} />
         {/* Market Trends Analysis */}
-        {/* <MarketTrendsChart data={generatedContent.marketTrends} /> */}
+        <MarketTrendsChart data={generatedContent.marketTrends} />
         {/* Comparable Properties */}
         <ComparableProperties
           properties={generatedContent.comparableProperties}
