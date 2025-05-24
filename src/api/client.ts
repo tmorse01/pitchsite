@@ -1,0 +1,79 @@
+interface FormData {
+  projectName: string;
+  address: string;
+  investmentType: string;
+  purchasePrice: number;
+  totalRaise: number;
+  targetIrr: string;
+  holdPeriod: string;
+  description: string;
+  sponsorBio: string;
+  image: File | null;
+}
+
+interface GeneratedContent {
+  executiveSummary: string;
+  investmentThesis: string;
+  riskFactors: string[];
+  locationOverview: string;
+  sponsorBio: string;
+}
+
+export async function generatePitchDeck(
+  formData: FormData
+): Promise<GeneratedContent> {
+  try {
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        projectName: formData.projectName,
+        address: formData.address,
+        investmentType: formData.investmentType,
+        purchasePrice: formData.purchasePrice,
+        equityRaise: formData.totalRaise,
+        targetIrr: formData.targetIrr,
+        holdPeriod: formData.holdPeriod,
+        description: formData.description,
+        sponsorBio: formData.sponsorBio,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error generating pitch deck:", error);
+    throw error;
+  }
+}
+
+export async function testApi(): Promise<{
+  message: string;
+  method: string;
+  timestamp: string;
+}> {
+  try {
+    const response = await fetch("/api/test", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error testing API:", error);
+    throw error;
+  }
+}
