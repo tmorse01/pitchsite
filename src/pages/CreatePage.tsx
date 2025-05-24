@@ -28,6 +28,7 @@ interface FormData {
   description: string;
   sponsorBio: string;
   image: File | null;
+  tone: string;
 }
 
 export default function CreatePage() {
@@ -48,6 +49,7 @@ export default function CreatePage() {
       sponsorBio:
         "John Smith has over 15 years of experience in real estate development and property management. He has successfully completed over $50M in real estate transactions and specializes in value-add multifamily properties.",
       image: null,
+      tone: "Professional",
     },
     validate: (values) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -199,6 +201,12 @@ export default function CreatePage() {
 
           <Stepper.Step label="Additional Info" description="Details and bio">
             <Stack gap="md" mt="xl">
+              <Select
+                label="AI Content Tone"
+                placeholder="Select content tone"
+                data={["Professional", "Persuasive", "Data-Driven"]}
+                {...form.getInputProps("tone")}
+              />
               <Textarea
                 label="Project Description (Optional)"
                 placeholder="Describe the project, target market, strategy..."
@@ -244,7 +252,7 @@ export default function CreatePage() {
               Generate Pitch Deck
             </Button>
           )}
-        </Group>{" "}
+        </Group>
       </Stack>
     </Paper>
   );

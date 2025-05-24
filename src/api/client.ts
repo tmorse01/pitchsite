@@ -9,6 +9,7 @@ interface FormData {
   description: string;
   sponsorBio: string;
   image: File | null;
+  tone: string;
 }
 
 interface GeneratedContent {
@@ -16,7 +17,23 @@ interface GeneratedContent {
   investmentThesis: string;
   riskFactors: string[];
   locationOverview: string;
+  locationSnapshot: string;
   sponsorBio: string;
+  comparableProperties: Array<{
+    address: string;
+    price: string;
+    distance: string;
+    note: string;
+  }>;
+  marketTrends: {
+    priceTrends: Array<{
+      year: string;
+      medianPrice: number;
+      rentGrowth: number;
+      capRate: number;
+    }>;
+    summary: string;
+  };
 }
 
 export async function generatePitchDeck(
@@ -27,8 +44,7 @@ export async function generatePitchDeck(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+      },      body: JSON.stringify({
         projectName: formData.projectName,
         address: formData.address,
         investmentType: formData.investmentType,
@@ -38,6 +54,7 @@ export async function generatePitchDeck(
         holdPeriod: formData.holdPeriod,
         description: formData.description,
         sponsorBio: formData.sponsorBio,
+        tone: formData.tone,
       }),
     });
 

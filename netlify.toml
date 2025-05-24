@@ -1,6 +1,7 @@
 [dev]
   functions = "netlify/functions"
   publish = "dist"
+  port = 8888
 
 [[redirects]]
   from = "/api/test"

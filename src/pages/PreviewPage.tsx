@@ -10,6 +10,10 @@ import {
   Badge,
 } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
+// import MarketTrendsChart from "../components/MarketTrendsChart";
+import ComparableProperties from "../components/ComparableProperties";
+import LocationMap from "../components/LocationMap";
+import ROISimulator from "../components/ROISimulator";
 
 interface PitchData {
   formData: {
@@ -22,13 +26,30 @@ interface PitchData {
     holdPeriod: string;
     description: string;
     sponsorBio: string;
+    tone: string;
   };
   generatedContent: {
     executiveSummary: string;
     investmentThesis: string;
     riskFactors: string[];
     locationOverview: string;
+    locationSnapshot: string;
     sponsorBio: string;
+    comparableProperties: Array<{
+      address: string;
+      price: string;
+      distance: string;
+      note: string;
+    }>;
+    marketTrends: {
+      priceTrends: Array<{
+        year: string;
+        medianPrice: number;
+        rentGrowth: number;
+        capRate: number;
+      }>;
+      summary: string;
+    };
   };
 }
 
@@ -126,7 +147,6 @@ export default function PreviewPage() {
             <Text>{generatedContent.executiveSummary}</Text>
           </Stack>
         </Paper>
-
         {/* Investment Thesis & Deal Metrics */}
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl">
           <Paper shadow="sm" p="xl" radius="md" h="fit-content">
@@ -167,8 +187,7 @@ export default function PreviewPage() {
               </Stack>
             </Stack>
           </Paper>
-        </SimpleGrid>
-
+        </SimpleGrid>{" "}
         {/* Location & Risk Factors */}
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl">
           <Paper shadow="sm" p="xl" radius="md">
@@ -195,7 +214,28 @@ export default function PreviewPage() {
             </Stack>
           </Paper>
         </SimpleGrid>
-
+        {/* Location Snapshot - Enhanced with AI tone */}
+        <Paper shadow="sm" p="xl" radius="md">
+          <Stack gap="md">
+            <Title order={2} c="indigo">
+              Location Snapshot
+            </Title>
+            <Text>{generatedContent.locationSnapshot}</Text>
+          </Stack>
+        </Paper>
+        {/* Location Map with Zillow Links */}
+        <LocationMap address={formData.address} />
+        {/* Market Trends Analysis */}
+        {/* <MarketTrendsChart data={generatedContent.marketTrends} /> */}
+        {/* Comparable Properties */}
+        <ComparableProperties
+          properties={generatedContent.comparableProperties}
+        />
+        {/* ROI Simulator */}
+        <ROISimulator
+          purchasePrice={formData.purchasePrice}
+          initialRent={Math.floor(formData.purchasePrice * 0.008)} // Estimate 0.8% of purchase price as monthly rent
+        />
         {/* Sponsor Information */}
         <Paper shadow="sm" p="xl" radius="md">
           <Stack gap="md">
@@ -205,7 +245,6 @@ export default function PreviewPage() {
             <Text>{generatedContent.sponsorBio}</Text>
           </Stack>
         </Paper>
-
         {/* Contact Footer */}
         <Paper shadow="sm" p="xl" radius="md" bg="gray.0">
           <Stack gap="md" align="center" ta="center">
