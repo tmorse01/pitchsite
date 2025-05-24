@@ -1,6 +1,7 @@
 import { Paper, Title, Text, Stack, SimpleGrid, Group } from "@mantine/core";
 import { LineChart } from "@mantine/charts";
 import { IconHome, IconTrendingUp, IconPercentage } from "@tabler/icons-react";
+import { formatCurrency, formatPercent } from "../utils/formatters";
 
 interface MarketTrendsData {
   priceTrends: Array<{
@@ -17,16 +18,6 @@ interface MarketTrendsChartProps {
 }
 
 export default function MarketTrendsChart({ data }: MarketTrendsChartProps) {
-  const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-    }).format(value);
-  };
-
-  const formatPercent = (value: number) => `${value}%`;
-
   return (
     <Paper shadow="sm" p="xl" radius="md">
       <Stack gap="lg">
