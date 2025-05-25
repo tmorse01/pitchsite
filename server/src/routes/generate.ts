@@ -35,10 +35,23 @@ interface MarketTrendsData {
   summary: string;
 }
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY || "",
-});
+// Function to get OpenAI client (lazy initialization)
+function getOpenAIClient() {
+  const apiKey = process.env.OPENAI_API_KEY;
+
+  if (!apiKey) {
+    throw new Error("OpenAI API key not found in environment variables");
+  }
+
+  console.log(
+    "Creating OpenAI client with API key:",
+    apiKey.substring(0, 10) + "..."
+  );
+
+  return new OpenAI({
+    apiKey: apiKey,
+  });
+}
 
 // Generate endpoint
 router.post("/generate", async (req: Request, res: Response) => {
@@ -291,6 +304,7 @@ Please provide the following sections in JSON format:
 
 Return only a valid JSON object with these fields. Do not wrap the response in markdown code blocks or any other formatting - return raw JSON only.`;
 
+    const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
