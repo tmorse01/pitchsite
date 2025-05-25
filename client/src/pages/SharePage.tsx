@@ -60,7 +60,6 @@ export default function SharePage() {
   const [pitchData, setPitchData] = useState<PitchData | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-
   useEffect(() => {
     if (deckId) {
       const stored = localStorage.getItem(`pitch_${deckId}`);
@@ -70,6 +69,20 @@ export default function SharePage() {
     }
     setLoading(false);
   }, [deckId]);
+
+  // Update document title when pitch data is available
+  useEffect(() => {
+    if (pitchData?.formData?.projectName) {
+      document.title = `${pitchData.formData.projectName} - Investment Opportunity | PitchSite`;
+    } else {
+      document.title = "Investment Opportunity | PitchSite";
+    }
+
+    // Clean up title when component unmounts
+    return () => {
+      document.title = "PitchSite";
+    };
+  }, [pitchData]);
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
