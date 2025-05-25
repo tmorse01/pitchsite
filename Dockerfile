@@ -3,22 +3,19 @@ FROM node:20-alpine
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package files for workspace
 COPY package*.json ./
 COPY server/package*.json ./server/
 COPY client/package*.json ./client/
 
-# Install dependencies
+# Install all workspace dependencies from root
 RUN npm ci
-RUN cd server && npm ci
-RUN cd client && npm ci
 
 # Copy source code
 COPY . .
 
-# Build the applications
-RUN cd server && npm run build
-RUN cd client && npm run build
+# Build the applications using workspace commands
+RUN npm run build
 
 # Expose port
 EXPOSE 3001
