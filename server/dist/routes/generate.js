@@ -1,12 +1,22 @@
 import { Router } from "express";
 import OpenAI from "openai";
+import { authenticateToken, login } from "../middleware/auth.js";
 const router = Router();
-// Initialize OpenAI client
-const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY || "",
-});
-// Generate endpoint
-router.post("/generate", async (req, res) => {
+// Function to get OpenAI client (lazy initialization)
+function getOpenAIClient() {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+        throw new Error("OpenAI API key not found in environment variables");
+    }
+    console.log("Creating OpenAI client with API key:", apiKey.substring(0, 10) + "...");
+    return new OpenAI({
+        apiKey: apiKey,
+    });
+}
+// Login endpoint - No authentication required
+router.post("/login", login);
+// Generate endpoint - Protected with JWT authentication
+router.post("/generate", authenticateToken, async (req, res) => {
     try {
         const body = req.body;
         // Debug logging for API key
@@ -38,8 +48,8 @@ router.post("/generate", async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error" });
     }
 });
-// Test endpoint
-router.get("/test", (req, res) => {
+// Test endpoint - Protected with JWT authentication
+router.get("/test", authenticateToken, (req, res) => {
     res.json({
         message: "Generate API is working!",
         timestamp: new Date().toISOString(),
@@ -185,6 +195,7 @@ Please provide the following sections in JSON format:
 7. comparableProperties: Array of 3 comparable properties with realistic addresses, prices around ${formatCurrency(purchasePrice)}, distances, and notes
 
 Return only a valid JSON object with these fields. Do not wrap the response in markdown code blocks or any other formatting - return raw JSON only.`;
+        const openai = getOpenAIClient();
         const completion = await openai.chat.completions.create({
             model: "gpt-4o-mini",
             messages: [

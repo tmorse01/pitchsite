@@ -1,5 +1,6 @@
 import { Router, Request, Response } from "express";
 import OpenAI from "openai";
+import { authenticateToken, login } from "../middleware/auth.js";
 
 const router = Router();
 
@@ -53,48 +54,55 @@ function getOpenAIClient() {
   });
 }
 
-// Generate endpoint
-router.post("/generate", async (req: Request, res: Response) => {
-  try {
-    const body: RequestBody = req.body;
+// Login endpoint - No authentication required
+router.post("/login", login);
 
-    // Debug logging for API key
-    console.log("API Key present:", !!process.env.OPENAI_API_KEY);
-    console.log("API Key length:", process.env.OPENAI_API_KEY?.length || 0);
-    console.log(
-      "API Key starts with:",
-      process.env.OPENAI_API_KEY?.substring(0, 7)
-    );
+// Generate endpoint - Protected with JWT authentication
+router.post(
+  "/generate",
+  authenticateToken,
+  async (req: Request, res: Response) => {
+    try {
+      const body: RequestBody = req.body;
 
-    // Check if OpenAI API key is available
-    if (!process.env.OPENAI_API_KEY) {
-      console.warn("OpenAI API key not found, using fallback generation");
-      // Fall back to hardcoded content if no API key
-      const response = {
-        executiveSummary: generateExecutiveSummaryFallback(body),
-        investmentThesis: generateInvestmentThesisFallback(body),
-        riskFactors: generateRiskFactorsFallback(body),
-        locationOverview: generateLocationOverviewFallback(body),
-        locationSnapshot: generateLocationSnapshotFallback(body),
-        sponsorBio: generateSponsorBioFallback(body),
-        comparableProperties: generateComparableProperties(body),
-        marketTrends: generateMarketTrends(body),
-      };
+      // Debug logging for API key
+      console.log("API Key present:", !!process.env.OPENAI_API_KEY);
+      console.log("API Key length:", process.env.OPENAI_API_KEY?.length || 0);
+      console.log(
+        "API Key starts with:",
+        process.env.OPENAI_API_KEY?.substring(0, 7)
+      );
 
+      // Check if OpenAI API key is available
+      if (!process.env.OPENAI_API_KEY) {
+        console.warn("OpenAI API key not found, using fallback generation");
+        // Fall back to hardcoded content if no API key
+        const response = {
+          executiveSummary: generateExecutiveSummaryFallback(body),
+          investmentThesis: generateInvestmentThesisFallback(body),
+          riskFactors: generateRiskFactorsFallback(body),
+          locationOverview: generateLocationOverviewFallback(body),
+          locationSnapshot: generateLocationSnapshotFallback(body),
+          sponsorBio: generateSponsorBioFallback(body),
+          comparableProperties: generateComparableProperties(body),
+          marketTrends: generateMarketTrends(body),
+        };
+
+        return res.json(response);
+      }
+
+      // Generate AI content using OpenAI
+      const response = await generateAIContent(body);
       return res.json(response);
+    } catch (error) {
+      console.error("Error processing request:", error);
+      return res.status(500).json({ error: "Internal Server Error" });
     }
-
-    // Generate AI content using OpenAI
-    const response = await generateAIContent(body);
-    return res.json(response);
-  } catch (error) {
-    console.error("Error processing request:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
   }
-});
+);
 
-// Test endpoint
-router.get("/test", (req: Request, res: Response) => {
+// Test endpoint - Protected with JWT authentication
+router.get("/test", authenticateToken, (req: Request, res: Response) => {
   res.json({
     message: "Generate API is working!",
     timestamp: new Date().toISOString(),

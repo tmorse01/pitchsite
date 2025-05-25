@@ -6,8 +6,15 @@ import generateRouter from "./routes/generate.js";
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
+// CORS configuration for Railway deployment
+const corsOptions = {
+    origin: process.env.NODE_ENV === 'production'
+        ? process.env.ALLOWED_ORIGINS?.split(',') || []
+        : ['http://localhost:5173', 'http://localhost:3000'],
+    credentials: true
+};
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 // Routes
 app.use("/api", generateRouter);

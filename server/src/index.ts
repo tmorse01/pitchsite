@@ -15,10 +15,11 @@ const PORT = process.env.PORT || 3001;
 
 // CORS configuration for Railway deployment
 const corsOptions = {
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.ALLOWED_ORIGINS?.split(',') || []
-    : ['http://localhost:5173', 'http://localhost:3000'],
-  credentials: true
+  origin:
+    process.env.NODE_ENV === "production"
+      ? process.env.ALLOWED_ORIGINS?.split(",") || []
+      : ["http://localhost:5173", "http://localhost:3000"],
+  credentials: true,
 };
 
 // Middleware
@@ -73,4 +74,6 @@ app.listen(PORT, () => {
   console.log(
     `🔑 OpenAI API Key: ${process.env.OPENAI_API_KEY ? "Present" : "Missing"}`
   );
+  console.log(`🔐 App Password: ${process.env.APP_PASSWORD || "Not Set"}`);
+  console.log(`🔑 JWT Secret: ${process.env.JWT_SECRET ? "Set" : "Not Set"}`);
 });

@@ -39,15 +39,29 @@ interface GeneratedContent {
 // Get API base URL from environment variables
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
 
+// Helper function to get JWT token from localStorage
+function getAuthToken(): string | null {
+  const token = localStorage.getItem("pitchsite_auth");
+  return token && token !== "authenticated" ? token : null;
+}
+
 export async function generatePitchDeck(
   formData: FormData
 ): Promise<GeneratedContent> {
   try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    // Add JWT token if available
+    const token = getAuthToken();
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_BASE_URL}/api/generate`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify({
         projectName: formData.projectName,
         address: formData.address,
@@ -63,6 +77,12 @@ export async function generatePitchDeck(
     });
 
     if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        // Token is invalid, remove it and redirect to login
+        localStorage.removeItem("pitchsite_auth");
+        window.location.reload();
+        throw new Error("Authentication required. Please log in again.");
+      }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
@@ -80,14 +100,28 @@ export async function testApi(): Promise<{
   timestamp: string;
 }> {
   try {
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    // Add JWT token if available
+    const token = getAuthToken();
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_BASE_URL}/api/test`, {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
     });
 
     if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        // Token is invalid, remove it and redirect to login
+        localStorage.removeItem("pitchsite_auth");
+        window.location.reload();
+        throw new Error("Authentication required. Please log in again.");
+      }
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 

@@ -21,26 +21,77 @@ export default function PasswordGate({ children }: PasswordGateProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
-
   // Check if user is already authenticated on component mount
   useEffect(() => {
-    const stored = localStorage.getItem("pitchsite_auth");
-    if (stored === "authenticated") {
-      setIsAuthenticated(true);
-    }
-    setLoading(false);
-  }, []);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (password === "pitch") {
-      localStorage.setItem("pitchsite_auth", "authenticated");
-      setIsAuthenticated(true);
-      setError("");
+    const token = localStorage.getItem("pitchsite_auth");
+    if (token && token !== "authenticated") {
+      // Verify the token is still valid by making a test API call
+      fetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:3001"}/api/test`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
+        .then((response) => {
+          if (response.ok) {
+            setIsAuthenticated(true);
+          } else {
+            // Token is invalid, remove it
+            localStorage.removeItem("pitchsite_auth");
+          }
+        })
+        .catch(() => {
+          // Network error or token invalid, remove it
+          localStorage.removeItem("pitchsite_auth");
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else if (token === "authenticated") {
+      // Handle old authentication format
+      localStorage.removeItem("pitchsite_auth");
+      setLoading(false);
     } else {
-      setError("Incorrect password. Please try again.");
+      setLoading(false);
+    }
+  }, []);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      // Call the login API to get JWT token
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || "http://localhost:3001"}/api/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ password }),
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        // Store JWT token instead of just "authenticated"
+        localStorage.setItem("pitchsite_auth", data.token);
+        setIsAuthenticated(true);
+        setError("");
+      } else {
+        const errorData = await response.json();
+        setError(errorData.message || "Incorrect password. Please try again.");
+        setPassword("");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setError("Connection error. Please try again.");
       setPassword("");
+    } finally {
+      setLoading(false);
     }
   };
 
