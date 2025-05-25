@@ -36,15 +36,19 @@ interface GeneratedContent {
   };
 }
 
+// Get API base URL from environment variables
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3001";
+
 export async function generatePitchDeck(
   formData: FormData
 ): Promise<GeneratedContent> {
   try {
-    const response = await fetch("/api/generate", {
+    const response = await fetch(`${API_BASE_URL}/api/generate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-      },      body: JSON.stringify({
+      },
+      body: JSON.stringify({
         projectName: formData.projectName,
         address: formData.address,
         investmentType: formData.investmentType,
@@ -76,7 +80,7 @@ export async function testApi(): Promise<{
   timestamp: string;
 }> {
   try {
-    const response = await fetch("/api/test", {
+    const response = await fetch(`${API_BASE_URL}/api/test`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

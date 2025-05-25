@@ -7,8 +7,9 @@ Create a React + Vite project called **"PitchSite"** that helps real estate inve
 - **React + Vite** (TypeScript)
 - **Mantine UI** for component styling
 - **React Router** for client-side routing
-- **Netlify Functions** for serverless API logic
-- **No SSR** — purely client-rendered app
+- **Node.js + Express** for backend API
+- **Railway** for deployment
+- **No SSR** — purely client-rendered app with separate backend
 
 ---
 
@@ -36,9 +37,9 @@ Use `@mantine/form` and `Stepper` to guide users through the following fields:
 
 ### 3. Backend Logic (`/api/generate`)
 
-Create a Netlify Function that:
+Create an Express API server that:
 
-- Accepts form data via `POST`
+- Accepts form data via `POST` to `/api/generate`
 - Returns a JSON object with:
   - Executive Summary
   - Investment Thesis
@@ -72,32 +73,27 @@ Create a Netlify Function that:
   /pages
   App.tsx
   main.tsx
-/netlify/functions/generate.ts
-netlify.toml
+/server
+  index.js
+  package.json
+  routes/
+    generate.js
 ```
 
 ### 7. Deployment
 
-- Deploy to **Netlify**
-- Use `netlify dev` for local development
-- Redirect `/api/generate` to Netlify Function using `netlify.toml`:
-
-```toml
-[dev]
-  functions = "netlify/functions"
-  publish = "dist"
-
-[[redirects]]
-  from = "/api/generate"
-  to = "/.netlify/functions/generate"
-  status = 200
-```
+- Deploy to **Railway**
+- Frontend and backend as separate services
+- Frontend: Static React build
+- Backend: Node.js Express server
+- Environment variables for API URL configuration
+- Use Railway's automatic deployment from Git
 
 ---
 
 ## 📄 API Response Format (`/api/generate`)
 
-Return the following structure in your Netlify function:
+Return the following structure from your Express API endpoint:
 
 ```json
 {

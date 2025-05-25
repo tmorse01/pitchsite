@@ -1,10 +1,7 @@
-import type { Handler, HandlerEvent, HandlerContext } from "@netlify/functions";
+import { Router, Request, Response } from "express";
 import OpenAI from "openai";
-import dotenv from "dotenv";
-import path from "path";
 
-// Load environment variables from .env file
-dotenv.config({ path: path.resolve(process.cwd(), ".env") });
+const router = Router();
 
 interface RequestBody {
   projectName: string;
@@ -19,41 +16,34 @@ interface RequestBody {
   tone?: string;
 }
 
+interface ComparableProperty {
+  address: string;
+  price: string;
+  distance: string;
+  note: string;
+}
+
+interface MarketTrend {
+  year: string;
+  medianPrice: number;
+  rentGrowth: number;
+  capRate: number;
+}
+
+interface MarketTrendsData {
+  priceTrends: MarketTrend[];
+  summary: string;
+}
+
 // Initialize OpenAI client
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY || "",
 });
 
-const handler: Handler = async (
-  event: HandlerEvent,
-  _context: HandlerContext
-) => {
-  // CORS headers
-  const headers = {
-    "Access-Control-Allow-Origin": "*",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Content-Type": "application/json",
-  };
-
-  // Handle preflight requests
-  if (event.httpMethod === "OPTIONS") {
-    return {
-      statusCode: 200,
-      headers,
-      body: "",
-    };
-  }
-
-  if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      headers,
-      body: JSON.stringify({ error: "Method Not Allowed" }),
-    };
-  }
+// Generate endpoint
+router.post("/generate", async (req: Request, res: Response) => {
   try {
-    const body: RequestBody = JSON.parse(event.body || "{}");
+    const body: RequestBody = req.body;
 
     // Debug logging for API key
     console.log("API Key present:", !!process.env.OPENAI_API_KEY);
@@ -78,30 +68,25 @@ const handler: Handler = async (
         marketTrends: generateMarketTrends(body),
       };
 
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify(response),
-      };
+      return res.json(response);
     }
 
     // Generate AI content using OpenAI
     const response = await generateAIContent(body);
-
-    return {
-      statusCode: 200,
-      headers,
-      body: JSON.stringify(response),
-    };
+    return res.json(response);
   } catch (error) {
     console.error("Error processing request:", error);
-    return {
-      statusCode: 500,
-      headers,
-      body: JSON.stringify({ error: "Internal Server Error" }),
-    };
+    return res.status(500).json({ error: "Internal Server Error" });
   }
-};
+});
+
+// Test endpoint
+router.get("/test", (req: Request, res: Response) => {
+  res.json({
+    message: "Generate API is working!",
+    timestamp: new Date().toISOString(),
+  });
+});
 
 function generateExecutiveSummaryFallback(data: RequestBody): string {
   const {
@@ -185,7 +170,7 @@ function generateLocationSnapshotFallback(data: RequestBody): string {
   return `${location} ${style}. The area features a growing population base, diverse employment opportunities across technology, healthcare, and finance sectors, and ongoing infrastructure improvements. Recent market analysis indicates sustained rental demand with vacancy rates below regional averages. The location's proximity to major universities and employment centers ensures consistent tenant demand and strong long-term appreciation potential.`;
 }
 
-function generateComparableProperties(data: RequestBody) {
+function generateComparableProperties(data: RequestBody): ComparableProperty[] {
   const { purchasePrice } = data;
 
   // Generate realistic comparable prices based on the purchase price
@@ -214,7 +199,7 @@ function generateComparableProperties(data: RequestBody) {
   return comps;
 }
 
-function generateMarketTrends(data: RequestBody) {
+function generateMarketTrends(data: RequestBody): MarketTrendsData {
   const currentYear = new Date().getFullYear();
   const { purchasePrice } = data;
 
@@ -305,6 +290,7 @@ Please provide the following sections in JSON format:
     )}, distances, and notes
 
 Return only a valid JSON object with these fields. Do not wrap the response in markdown code blocks or any other formatting - return raw JSON only.`;
+
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -318,13 +304,16 @@ Return only a valid JSON object with these fields. Do not wrap the response in m
           content: prompt,
         },
       ],
-      max_tokens: 1500,
+      max_tokens: 800,
       temperature: 0.7,
     });
+
     const aiResponse = completion.choices[0]?.message?.content;
     if (!aiResponse) {
       throw new Error("No response from OpenAI");
-    } // Extract JSON from markdown code blocks if present
+    }
+
+    // Extract JSON from markdown code blocks if present
     let jsonString = aiResponse;
     const jsonMatch = aiResponse.match(/```json\s*([\s\S]*?)\s*```/);
     if (jsonMatch) {
@@ -396,4 +385,4 @@ Return only a valid JSON object with these fields. Do not wrap the response in m
   }
 }
 
-export { handler };
+export default router;
