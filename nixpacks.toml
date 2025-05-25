@@ -1,15 +1,22 @@
 [phases.setup]
 nixPkgs = ['nodejs_20']
 
+[variables]
+NPM_CONFIG_INCLUDE = "optional"
+NIXPACKS_NO_CACHE = "1"
+
 [phases.install]
 cmds = [
-    'npm ci --include=optional',
-    'cd server && npm ci',
-    'cd client && npm ci'
+    'rm -rf node_modules package-lock.json client/node_modules client/package-lock.json server/node_modules server/package-lock.json',
+    'npm cache clean --force',
+    'npm install --include=optional --verbose',
+    'cd server && npm install --include=optional',
+    'cd client && npm install --include=optional'
 ]
 
 [phases.build]
 cmds = [
+    'npm rebuild --verbose',
     'cd server && npm run build',
     'cd client && npm run build'
 ]
