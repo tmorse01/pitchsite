@@ -1,6 +1,6 @@
 # Backend-specific Nixpacks configuration  
 [phases.setup]
-nixPkgs = ['nodejs-18_x']
+nixPkgs = ['nodejs_20']
 
 [phases.install]
 cmds = ['npm ci']
