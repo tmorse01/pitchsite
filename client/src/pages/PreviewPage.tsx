@@ -12,6 +12,12 @@ import DealMetrics from "../components/shared/DealMetrics";
 import LocationOverview from "../components/shared/LocationOverview";
 import RiskFactors from "../components/shared/RiskFactors";
 import ContactFooter from "../components/shared/ContactFooter";
+import {
+  calculateDealMetrics,
+  getRiskColor,
+  formatCurrency,
+  calculateEstimatedRent,
+} from "../utils/dealMetrics";
 
 interface PitchData {
   formData: {
@@ -70,72 +76,16 @@ export default function PreviewPage() {
       navigate("/create"); // Redirect if no data
     }
   }, [navigate]);
-
   const handleShare = () => {
     // Generate a simple share ID and store the data
     const shareId = Math.random().toString(36).substring(2, 8);
     localStorage.setItem(`pitch_${shareId}`, JSON.stringify(pitchData));
     navigate(`/share/${shareId}`);
   };
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
 
-  // AI-generated metrics calculations
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const calculateDealMetrics = (formData: any) => {
-    const estimatedRent = Math.floor(formData.purchasePrice * 0.008); // 0.8% monthly rent
-    const annualRent = estimatedRent * 12;
-
-    // Cap Rate calculation
-    const capRate = ((annualRent / formData.purchasePrice) * 100).toFixed(2);
-
-    // Cash-on-Cash Return (assuming 20% down payment)
-    const downPayment = formData.totalRaise;
-    const cashOnCash = ((annualRent / downPayment) * 100).toFixed(1);
-
-    // Risk Score (1-10, lower is better risk)
-    const baseRisk = 4;
-    const priceRisk = formData.purchasePrice > 500000 ? 1 : 0;
-    const locationRisk = Math.random() > 0.7 ? 1 : 0; // Simulated location risk
-    const riskScore = Math.min(10, baseRisk + priceRisk + locationRisk);
-
-    // Market Volatility (simulated based on price range)
-    const volatility =
-      formData.purchasePrice > 750000
-        ? "High"
-        : formData.purchasePrice > 400000
-        ? "Medium"
-        : "Low";
-
-    // Break-even analysis
-    const monthsToBreakEven = Math.ceil(
-      downPayment / (estimatedRent - estimatedRent * 0.3)
-    ); // 30% expenses
-    const breakEven = `${monthsToBreakEven} months`;
-
-    return {
-      capRate: `${capRate}%`,
-      cashOnCashReturn: `${cashOnCash}%`,
-      riskScore,
-      marketVolatility: volatility,
-      breakEvenAnalysis: breakEven,
-    };
-  };
-
-  const getRiskColor = (score: number) => {
-    if (score <= 3) return "green";
-    if (score <= 6) return "yellow";
-    return "red";
-  };
   if (!pitchData) {
     return <Text ta="center">Loading...</Text>;
   }
-
   const { formData, generatedContent } = pitchData;
   const aiMetrics = calculateDealMetrics(formData);
   return (
@@ -154,7 +104,7 @@ export default function PreviewPage() {
           title="Executive Summary"
           content={generatedContent.executiveSummary}
           animated={false}
-        />{" "}
+        />
         {/* Investment Thesis & Deal Metrics */}
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl">
           <InvestmentThesis
@@ -168,22 +118,22 @@ export default function PreviewPage() {
             getRiskColor={getRiskColor}
             animated={false}
           />
-        </SimpleGrid>{" "}
-        {/* Location & Risk Factors */}
+        </SimpleGrid>
+        {/* Location  */}
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl">
           <LocationOverview
             locationOverview={generatedContent.locationOverview}
             animated={false}
           />
-          <RiskFactors
-            riskFactors={generatedContent.riskFactors}
+          <ContentSection
+            title="Location Snapshot"
+            content={generatedContent.locationSnapshot}
             animated={false}
           />
         </SimpleGrid>
-        {/* Location Snapshot - Enhanced with AI tone */}
-        <ContentSection
-          title="Location Snapshot"
-          content={generatedContent.locationSnapshot}
+        {/* Risk Factors */}
+        <RiskFactors
+          riskFactors={generatedContent.riskFactors}
           animated={false}
         />
         {/* Location Map with Zillow Links */}
@@ -197,7 +147,7 @@ export default function PreviewPage() {
         {/* ROI Simulator */}
         <ROISimulator
           purchasePrice={formData.purchasePrice}
-          initialRent={Math.floor(formData.purchasePrice * 0.008)} // Estimate 0.8% of purchase price as monthly rent
+          initialRent={calculateEstimatedRent(formData.purchasePrice)}
         />
         {/* Sponsor Information */}
         <ContentSection

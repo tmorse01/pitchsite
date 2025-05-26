@@ -22,6 +22,12 @@ import RiskFactors from "../components/shared/RiskFactors";
 import ContactFooter from "../components/shared/ContactFooter";
 import AnimatedWrapper from "../components/shared/AnimatedWrapper";
 import DeckHeader from "../components/shared/DeckHeader";
+import {
+  calculateDealMetrics,
+  getRiskColor,
+  formatCurrency,
+  calculateEstimatedRent,
+} from "../utils/dealMetrics";
 
 interface PitchData {
   formData: {
@@ -90,62 +96,6 @@ export default function SharePage() {
     };
   }, [pitchData]);
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFractionDigits: 0,
-    }).format(amount);
-  };
-
-  // AI-generated metrics calculations
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const calculateDealMetrics = (formData: any) => {
-    const estimatedRent = Math.floor(formData.purchasePrice * 0.008); // 0.8% monthly rent
-    const annualRent = estimatedRent * 12;
-
-    // Cap Rate calculation
-    const capRate = ((annualRent / formData.purchasePrice) * 100).toFixed(2);
-
-    // Cash-on-Cash Return (assuming 20% down payment)
-    const downPayment = formData.totalRaise;
-    const cashOnCash = ((annualRent / downPayment) * 100).toFixed(1);
-
-    // Risk Score (1-10, lower is better risk)
-    const baseRisk = 4;
-    const priceRisk = formData.purchasePrice > 500000 ? 1 : 0;
-    const locationRisk = Math.random() > 0.7 ? 1 : 0; // Simulated location risk
-    const riskScore = Math.min(10, baseRisk + priceRisk + locationRisk);
-
-    // Market Volatility (simulated based on price range)
-    const volatility =
-      formData.purchasePrice > 750000
-        ? "High"
-        : formData.purchasePrice > 400000
-        ? "Medium"
-        : "Low";
-
-    // Break-even analysis
-    const monthsToBreakEven = Math.ceil(
-      downPayment / (estimatedRent - estimatedRent * 0.3)
-    ); // 30% expenses
-    const breakEven = `${monthsToBreakEven} months`;
-
-    return {
-      capRate: `${capRate}%`,
-      cashOnCashReturn: `${cashOnCash}%`,
-      riskScore,
-      marketVolatility: volatility,
-      breakEvenAnalysis: breakEven,
-    };
-  };
-
-  const getRiskColor = (score: number) => {
-    if (score <= 3) return "green";
-    if (score <= 6) return "yellow";
-    return "red";
-  };
-
   if (loading) {
     return <Text ta="center">Loading...</Text>;
   }
@@ -197,21 +147,13 @@ export default function SharePage() {
             getRiskColor={getRiskColor}
             animated={true}
           />
-        </SimpleGrid>{" "}
-        {/* Location & Risk Factors */}
+        </SimpleGrid>
+        {/* Location */}
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl">
           <LocationOverview
             locationOverview={generatedContent.locationOverview}
             animated={true}
           />
-          <RiskFactors
-            riskFactors={generatedContent.riskFactors}
-            animated={true}
-          />
-        </SimpleGrid>
-        {/* Investment Description */}
-        {/* Location Snapshot - Enhanced with AI tone */}
-        <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl">
           <ContentSection
             title="Location Snapshot"
             content={generatedContent.locationSnapshot}
@@ -219,6 +161,12 @@ export default function SharePage() {
             delay={0.4}
           />
         </SimpleGrid>
+        {/* Risk Factors */}
+        <RiskFactors
+          riskFactors={generatedContent.riskFactors}
+          animated={true}
+        />
+
         {/* Investment Description */}
         {/* Location Map with Zillow Links */}
         <AnimatedWrapper animated={true} delay={0.2}>
@@ -238,7 +186,7 @@ export default function SharePage() {
         <AnimatedWrapper animated={true} delay={0.5}>
           <ROISimulator
             purchasePrice={formData.purchasePrice}
-            initialRent={Math.floor(formData.purchasePrice * 0.008)} // Estimate 0.8% of purchase price as monthly rent
+            initialRent={calculateEstimatedRent(formData.purchasePrice)}
           />
         </AnimatedWrapper>
         {/* Sponsor Information */}
