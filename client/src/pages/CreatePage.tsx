@@ -204,7 +204,15 @@ export default function CreatePage() {
               <Select
                 label="AI Content Tone"
                 placeholder="Select content tone"
-                data={["Professional", "Persuasive", "Data-Driven"]}
+                data={[
+                  "Professional",
+                  "Persuasive",
+                  "Data-Driven",
+                  "Concise",
+                  "Critical",
+                  "Engaging",
+                  "Creative",
+                ]}
                 {...form.getInputProps("tone")}
               />
               <Textarea
