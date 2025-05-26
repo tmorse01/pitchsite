@@ -96,7 +96,7 @@ export default function RiskFactors({
               <Badge variant="light" color="grape" size="sm">
                 Very Scientific
               </Badge>
-            </Group>{" "}
+            </Group>
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
               {/* Risk Level Distribution */}
               <Box>
@@ -194,7 +194,6 @@ export default function RiskFactors({
         variants={slideInRight}
         {...paperHover}
       >
-        {" "}
         <Paper shadow="sm" p="xl" radius="md" h="100%">
           <Stack gap="md">
             <Title order={2} c="indigo">
@@ -240,7 +239,7 @@ export default function RiskFactors({
                     <Badge variant="light" color="grape" size="sm">
                       Very Scientific
                     </Badge>
-                  </Group>{" "}
+                  </Group>
                   <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
                     {/* Risk Level Distribution */}
                     <motion.div
