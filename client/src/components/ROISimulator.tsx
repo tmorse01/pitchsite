@@ -1,13 +1,10 @@
-import {
-  Paper,
-  Title,
-  Text,
-  Stack,
-  Slider,
-  Group,
-  NumberFormatter,
-} from "@mantine/core";
+import { Paper, Title, Text, Stack, Slider, Group } from "@mantine/core";
 import { useState } from "react";
+import NumberCounter from "./animations/NumberCounter";
+import {
+  formatFullCurrency,
+  formatPercentWithDecimals,
+} from "../utils/formatters";
 
 interface ROISimulatorProps {
   purchasePrice: number;
@@ -21,7 +18,6 @@ export default function ROISimulator({
   const [exitCapRate, setExitCapRate] = useState(5.5);
   const [monthlyRent, setMonthlyRent] = useState(initialRent);
   const [holdPeriod, setHoldPeriod] = useState(5);
-
   // Simplified ROI calculation
   const calculateROI = () => {
     const annualRent = monthlyRent * 12;
@@ -30,16 +26,24 @@ export default function ROISimulator({
     const totalReturn = Number(
       (exitValue + totalRentReceived - purchasePrice).toFixed(2)
     );
-    const totalReturnPercent = (totalReturn / purchasePrice) * 100;
-    const annualizedReturn =
-      Math.pow(1 + totalReturn / purchasePrice, 1 / holdPeriod) - 1;
+    const totalReturnPercent = Number(
+      ((totalReturn / purchasePrice) * 100).toFixed(1)
+    );
+    const annualizedReturn = Number(
+      (
+        (Math.pow(1 + totalReturn / purchasePrice, 1 / holdPeriod) - 1) *
+        100
+      ).toFixed(1)
+    );
 
     return {
       exitValue,
       totalReturn,
       totalReturnPercent,
-      annualizedReturn: annualizedReturn * 100,
-      equityMultiple: (exitValue + totalRentReceived) / purchasePrice,
+      annualizedReturn,
+      equityMultiple: Number(
+        ((exitValue + totalRentReceived) / purchasePrice).toFixed(2)
+      ),
     };
   };
 
@@ -73,11 +77,10 @@ export default function ROISimulator({
                 { value: 8, label: "8%" },
               ]}
             />
-          </div>
-
+          </div>{" "}
           <div>
             <Text size="sm" fw={500} mb="xs">
-              Monthly Rent: ${monthlyRent.toLocaleString()}
+              Monthly Rent: {formatFullCurrency(monthlyRent)}
             </Text>
             <Slider
               value={monthlyRent}
@@ -88,17 +91,20 @@ export default function ROISimulator({
               marks={[
                 {
                   value: initialRent * 0.8,
-                  label: `$${Math.floor((initialRent * 0.8) / 100) * 100}`,
+                  label: formatFullCurrency(
+                    Math.floor((initialRent * 0.8) / 100) * 100
+                  ),
                 },
-                { value: initialRent, label: `$${initialRent}` },
+                { value: initialRent, label: formatFullCurrency(initialRent) },
                 {
                   value: initialRent * 1.5,
-                  label: `$${Math.floor((initialRent * 1.5) / 100) * 100}`,
+                  label: formatFullCurrency(
+                    Math.floor((initialRent * 1.5) / 100) * 100
+                  ),
                 },
               ]}
             />
           </div>
-
           <div>
             <Text size="sm" fw={500} mb="xs">
               Hold Period: {holdPeriod} years
@@ -118,7 +124,7 @@ export default function ROISimulator({
           </div>
         </Stack>
 
-        <Paper bg="gray.0" p="md" radius="md">
+        <Paper bg="gray.0" p="md" radius="md" mt="md">
           <Stack gap="sm">
             <Text fw={600} c="indigo">
               Projected Results
@@ -126,13 +132,13 @@ export default function ROISimulator({
             <Group justify="space-between">
               <Text size="sm">Exit Value:</Text>
               <Text size="sm" fw={500}>
-                <NumberFormatter
+                <NumberCounter
                   value={roi.exitValue}
                   prefix="$"
-                  thousandSeparator
+                  duration={0.8}
                 />
               </Text>
-            </Group>
+            </Group>{" "}
             <Group justify="space-between">
               <Text size="sm">Total Return:</Text>
               <Text
@@ -140,24 +146,34 @@ export default function ROISimulator({
                 fw={500}
                 c={roi.totalReturn > 0 ? "green" : "red"}
               >
-                <NumberFormatter
+                <NumberCounter
                   value={roi.totalReturn}
                   prefix="$"
-                  thousandSeparator
-                />
-                ({roi.totalReturnPercent.toFixed(1)}%)
+                  duration={0.8}
+                />{" "}
+                ({formatPercentWithDecimals(roi.totalReturnPercent, 1)})
               </Text>
             </Group>
             <Group justify="space-between">
               <Text size="sm">Annualized Return:</Text>
               <Text size="sm" fw={600} c="indigo">
-                {roi.annualizedReturn.toFixed(1)}% IRR
+                <NumberCounter
+                  value={roi.annualizedReturn}
+                  suffix="% IRR"
+                  decimals={1}
+                  duration={0.8}
+                />
               </Text>
             </Group>
             <Group justify="space-between">
               <Text size="sm">Equity Multiple:</Text>
               <Text size="sm" fw={500}>
-                {roi.equityMultiple.toFixed(2)}x
+                <NumberCounter
+                  value={roi.equityMultiple}
+                  suffix="x"
+                  decimals={2}
+                  duration={0.8}
+                />
               </Text>
             </Group>
           </Stack>
