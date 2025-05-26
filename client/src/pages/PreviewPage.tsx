@@ -1,20 +1,17 @@
 import { useEffect, useState } from "react";
-import {
-  Title,
-  Text,
-  Button,
-  Group,
-  Paper,
-  Stack,
-  SimpleGrid,
-  Badge,
-} from "@mantine/core";
+import { Text, Button, Group, Stack, SimpleGrid } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
 import MarketTrendsChart from "../components/MarketTrendsChart";
 import ComparableProperties from "../components/ComparableProperties";
 import LocationMap from "../components/LocationMap";
 import ROISimulator from "../components/ROISimulator";
-import MarkdownRenderer from "../components/MarkdownRenderer";
+import HeroSection from "../components/shared/HeroSection";
+import ContentSection from "../components/shared/ContentSection";
+import InvestmentThesis from "../components/shared/InvestmentThesis";
+import DealMetrics from "../components/shared/DealMetrics";
+import LocationOverview from "../components/shared/LocationOverview";
+import RiskFactors from "../components/shared/RiskFactors";
+import ContactFooter from "../components/shared/ContactFooter";
 
 interface PitchData {
   formData: {
@@ -51,6 +48,13 @@ interface PitchData {
       }>;
       summary: string;
     };
+    dealMetrics?: {
+      capRate: string;
+      cashOnCashReturn: string;
+      riskScore: number;
+      marketVolatility: string;
+      breakEvenAnalysis: string;
+    };
   };
 }
 
@@ -73,7 +77,6 @@ export default function PreviewPage() {
     localStorage.setItem(`pitch_${shareId}`, JSON.stringify(pitchData));
     navigate(`/share/${shareId}`);
   };
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -81,150 +84,108 @@ export default function PreviewPage() {
       minimumFractionDigits: 0,
     }).format(amount);
   };
+
+  // AI-generated metrics calculations
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const calculateDealMetrics = (formData: any) => {
+    const estimatedRent = Math.floor(formData.purchasePrice * 0.008); // 0.8% monthly rent
+    const annualRent = estimatedRent * 12;
+
+    // Cap Rate calculation
+    const capRate = ((annualRent / formData.purchasePrice) * 100).toFixed(2);
+
+    // Cash-on-Cash Return (assuming 20% down payment)
+    const downPayment = formData.totalRaise;
+    const cashOnCash = ((annualRent / downPayment) * 100).toFixed(1);
+
+    // Risk Score (1-10, lower is better risk)
+    const baseRisk = 4;
+    const priceRisk = formData.purchasePrice > 500000 ? 1 : 0;
+    const locationRisk = Math.random() > 0.7 ? 1 : 0; // Simulated location risk
+    const riskScore = Math.min(10, baseRisk + priceRisk + locationRisk);
+
+    // Market Volatility (simulated based on price range)
+    const volatility =
+      formData.purchasePrice > 750000
+        ? "High"
+        : formData.purchasePrice > 400000
+        ? "Medium"
+        : "Low";
+
+    // Break-even analysis
+    const monthsToBreakEven = Math.ceil(
+      downPayment / (estimatedRent - estimatedRent * 0.3)
+    ); // 30% expenses
+    const breakEven = `${monthsToBreakEven} months`;
+
+    return {
+      capRate: `${capRate}%`,
+      cashOnCashReturn: `${cashOnCash}%`,
+      riskScore,
+      marketVolatility: volatility,
+      breakEvenAnalysis: breakEven,
+    };
+  };
+
+  const getRiskColor = (score: number) => {
+    if (score <= 3) return "green";
+    if (score <= 6) return "yellow";
+    return "red";
+  };
   if (!pitchData) {
     return <Text ta="center">Loading...</Text>;
   }
 
   const { formData, generatedContent } = pitchData;
+  const aiMetrics = calculateDealMetrics(formData);
   return (
     <>
       {/* Hero Section */}
-      <Paper shadow="sm" p="xl" radius="md" mb="xl" bg="indigo.0">
-        <Stack gap="md" align="center" ta="center">
-          <Badge size="lg" variant="filled" color="indigo">
-            Investment Opportunity
-          </Badge>
-          <Title order={1} size="h1" c="indigo">
-            {formData.projectName}
-          </Title>
-          <Text size="lg" c="dimmed">
-            {formData.address}
-          </Text>
-          <Group gap="xl" mt="md">
-            <Stack gap={4} align="center">
-              <Text size="sm" c="dimmed" fw={500}>
-                Purchase Price
-              </Text>
-              <Text size="xl" fw={700} c="indigo">
-                {formatCurrency(formData.purchasePrice)}
-              </Text>
-            </Stack>
-            <Stack gap={4} align="center">
-              <Text size="sm" c="dimmed" fw={500}>
-                Equity Raise
-              </Text>
-              <Text size="xl" fw={700} c="indigo">
-                {formatCurrency(formData.totalRaise)}
-              </Text>
-            </Stack>
-            <Stack gap={4} align="center">
-              <Text size="sm" c="dimmed" fw={500}>
-                Target IRR
-              </Text>
-              <Text size="xl" fw={700} c="indigo">
-                {formData.targetIrr}
-              </Text>
-            </Stack>
-            <Stack gap={4} align="center">
-              <Text size="sm" c="dimmed" fw={500}>
-                Hold Period
-              </Text>
-              <Text size="xl" fw={700} c="indigo">
-                {formData.holdPeriod}
-              </Text>
-            </Stack>
-          </Group>
-        </Stack>
-      </Paper>
+      <HeroSection
+        formData={formData}
+        formatCurrency={formatCurrency}
+        animated={false}
+      />
 
       {/* Content Sections */}
       <Stack gap="xl">
-        {" "}
         {/* Executive Summary */}
-        <Paper shadow="sm" p="xl" radius="md">
-          <Stack gap="md">
-            <Title order={2} c="indigo">
-              Executive Summary
-            </Title>
-            <MarkdownRenderer content={generatedContent.executiveSummary} />
-          </Stack>
-        </Paper>
+        <ContentSection
+          title="Executive Summary"
+          content={generatedContent.executiveSummary}
+          animated={false}
+        />{" "}
         {/* Investment Thesis & Deal Metrics */}
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl">
-          {" "}
-          <Paper shadow="sm" p="xl" radius="md" h="fit-content">
-            <Stack gap="md">
-              <Title order={2} c="indigo">
-                Investment Thesis
-              </Title>
-              <MarkdownRenderer content={generatedContent.investmentThesis} />
-            </Stack>
-          </Paper>
-          <Paper shadow="sm" p="xl" radius="md" h="fit-content">
-            <Stack gap="md">
-              <Title order={2} c="indigo">
-                Deal Metrics
-              </Title>
-              <Stack gap="sm">
-                <Group justify="space-between">
-                  <Text fw={500}>Investment Type:</Text>
-                  <Badge variant="light">{formData.investmentType}</Badge>
-                </Group>
-                <Group justify="space-between">
-                  <Text fw={500}>Purchase Price:</Text>
-                  <Text>{formatCurrency(formData.purchasePrice)}</Text>
-                </Group>
-                <Group justify="space-between">
-                  <Text fw={500}>Equity Raise:</Text>
-                  <Text>{formatCurrency(formData.totalRaise)}</Text>
-                </Group>
-                <Group justify="space-between">
-                  <Text fw={500}>Target IRR:</Text>
-                  <Text>{formData.targetIrr}</Text>
-                </Group>
-                <Group justify="space-between">
-                  <Text fw={500}>Hold Period:</Text>
-                  <Text>{formData.holdPeriod}</Text>
-                </Group>
-              </Stack>
-            </Stack>
-          </Paper>
-        </SimpleGrid>
+          <InvestmentThesis
+            investmentThesis={generatedContent.investmentThesis}
+            animated={false}
+          />
+          <DealMetrics
+            formData={formData}
+            dealMetrics={aiMetrics}
+            formatCurrency={formatCurrency}
+            getRiskColor={getRiskColor}
+            animated={false}
+          />
+        </SimpleGrid>{" "}
         {/* Location & Risk Factors */}
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl">
-          {" "}
-          <Paper shadow="sm" p="xl" radius="md">
-            <Stack gap="md">
-              <Title order={2} c="indigo">
-                Location Overview
-              </Title>
-              <MarkdownRenderer content={generatedContent.locationOverview} />
-            </Stack>
-          </Paper>
-          <Paper shadow="sm" p="xl" radius="md">
-            <Stack gap="md">
-              <Title order={2} c="indigo">
-                Risk Factors
-              </Title>
-              <Stack gap="xs">
-                {generatedContent.riskFactors.map((risk, index) => (
-                  <Text key={index} size="sm">
-                    • {risk}
-                  </Text>
-                ))}
-              </Stack>
-            </Stack>
-          </Paper>
+          <LocationOverview
+            locationOverview={generatedContent.locationOverview}
+            animated={false}
+          />
+          <RiskFactors
+            riskFactors={generatedContent.riskFactors}
+            animated={false}
+          />
         </SimpleGrid>
-        {/* Location Snapshot - Enhanced with AI tone */}{" "}
-        <Paper shadow="sm" p="xl" radius="md">
-          <Stack gap="md">
-            <Title order={2} c="indigo">
-              Location Snapshot
-            </Title>
-            <MarkdownRenderer content={generatedContent.locationSnapshot} />
-          </Stack>
-        </Paper>
+        {/* Location Snapshot - Enhanced with AI tone */}
+        <ContentSection
+          title="Location Snapshot"
+          content={generatedContent.locationSnapshot}
+          animated={false}
+        />
         {/* Location Map with Zillow Links */}
         <LocationMap address={formData.address} />
         {/* Market Trends Analysis */}
@@ -238,32 +199,18 @@ export default function PreviewPage() {
           purchasePrice={formData.purchasePrice}
           initialRent={Math.floor(formData.purchasePrice * 0.008)} // Estimate 0.8% of purchase price as monthly rent
         />
-        {/* Sponsor Information */}{" "}
-        <Paper shadow="sm" p="xl" radius="md">
-          <Stack gap="md">
-            <Title order={2} c="indigo">
-              Sponsor Information
-            </Title>
-            <MarkdownRenderer content={generatedContent.sponsorBio} />
-          </Stack>
-        </Paper>
+        {/* Sponsor Information */}
+        <ContentSection
+          title="Sponsor Information"
+          content={generatedContent.sponsorBio}
+          animated={false}
+        />
         {/* Contact Footer */}
-        <Paper shadow="sm" p="xl" radius="md" bg="gray.0">
-          <Stack gap="md" align="center" ta="center">
-            <Title order={3}>Ready to Invest?</Title>
-            <Text c="dimmed">
-              Contact us for more information and investment documentation
-            </Text>
-            <Group>
-              <Button variant="filled" size="lg">
-                Contact Sponsor
-              </Button>
-              <Button variant="outline" size="lg" onClick={handleShare}>
-                Share This Deck
-              </Button>
-            </Group>
-          </Stack>
-        </Paper>
+        <ContactFooter
+          animated={false}
+          onShareDeck={handleShare}
+          showShareButton={true}
+        />
       </Stack>
 
       {/* Action Buttons */}

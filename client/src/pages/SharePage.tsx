@@ -1,37 +1,27 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  Title,
   Text,
   Button,
   Group,
-  Paper,
   Stack,
-  SimpleGrid,
-  Badge,
   Box,
   Alert,
+  SimpleGrid,
 } from "@mantine/core";
-import { motion, useReducedMotion } from "framer-motion";
 import MarketTrendsChart from "../components/MarketTrendsChart";
 import ComparableProperties from "../components/ComparableProperties";
 import LocationMap from "../components/LocationMap";
 import ROISimulator from "../components/ROISimulator";
-import MarkdownRenderer from "../components/MarkdownRenderer";
-import AnimatedSection from "../components/animations/AnimatedSection";
-import NumberCounter from "../components/animations/NumberCounter";
-import {
-  slideInLeft,
-  slideInRight,
-  heroAnimations,
-  staggerContainer,
-  staggerItem,
-  paperHover,
-  buttonHover,
-  listVariants,
-  listItemVariants,
-  pulseCTA,
-} from "../utils/animations";
+import HeroSection from "../components/shared/HeroSection";
+import ContentSection from "../components/shared/ContentSection";
+import InvestmentThesis from "../components/shared/InvestmentThesis";
+import DealMetrics from "../components/shared/DealMetrics";
+import LocationOverview from "../components/shared/LocationOverview";
+import RiskFactors from "../components/shared/RiskFactors";
+import ContactFooter from "../components/shared/ContactFooter";
+import AnimatedWrapper from "../components/shared/AnimatedWrapper";
+import DeckHeader from "../components/shared/DeckHeader";
 
 interface PitchData {
   formData: {
@@ -76,7 +66,6 @@ export default function SharePage() {
   const [pitchData, setPitchData] = useState<PitchData | null>(null);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
-  const shouldReduceMotion = useReducedMotion();
   useEffect(() => {
     if (deckId) {
       const stored = localStorage.getItem(`pitch_${deckId}`);
@@ -108,6 +97,55 @@ export default function SharePage() {
       minimumFractionDigits: 0,
     }).format(amount);
   };
+
+  // AI-generated metrics calculations
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const calculateDealMetrics = (formData: any) => {
+    const estimatedRent = Math.floor(formData.purchasePrice * 0.008); // 0.8% monthly rent
+    const annualRent = estimatedRent * 12;
+
+    // Cap Rate calculation
+    const capRate = ((annualRent / formData.purchasePrice) * 100).toFixed(2);
+
+    // Cash-on-Cash Return (assuming 20% down payment)
+    const downPayment = formData.totalRaise;
+    const cashOnCash = ((annualRent / downPayment) * 100).toFixed(1);
+
+    // Risk Score (1-10, lower is better risk)
+    const baseRisk = 4;
+    const priceRisk = formData.purchasePrice > 500000 ? 1 : 0;
+    const locationRisk = Math.random() > 0.7 ? 1 : 0; // Simulated location risk
+    const riskScore = Math.min(10, baseRisk + priceRisk + locationRisk);
+
+    // Market Volatility (simulated based on price range)
+    const volatility =
+      formData.purchasePrice > 750000
+        ? "High"
+        : formData.purchasePrice > 400000
+        ? "Medium"
+        : "Low";
+
+    // Break-even analysis
+    const monthsToBreakEven = Math.ceil(
+      downPayment / (estimatedRent - estimatedRent * 0.3)
+    ); // 30% expenses
+    const breakEven = `${monthsToBreakEven} months`;
+
+    return {
+      capRate: `${capRate}%`,
+      cashOnCashReturn: `${cashOnCash}%`,
+      riskScore,
+      marketVolatility: volatility,
+      breakEvenAnalysis: breakEven,
+    };
+  };
+
+  const getRiskColor = (score: number) => {
+    if (score <= 3) return "green";
+    if (score <= 6) return "yellow";
+    return "red";
+  };
+
   if (loading) {
     return <Text ta="center">Loading...</Text>;
   }
@@ -123,306 +161,104 @@ export default function SharePage() {
     );
   }
   const { formData, generatedContent } = pitchData;
-
   return (
     <>
       {/* Shared Deck Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.6, -0.05, 0.01, 0.99] }}
-      >
-        <Paper shadow="sm" p="md" radius="md" mb="xl" bg="blue.0">
-          <Group justify="space-between" align="center">
-            <Stack gap={4}>
-              <Text size="sm" c="dimmed" fw={500}>
-                Shared Investment Opportunity
-              </Text>
-              <Text size="lg" fw={700}>
-                Deck ID: {deckId}
-              </Text>
-            </Stack>
-            <motion.div {...buttonHover}>
-              <Button variant="light" onClick={() => navigate("/")}>
-                Create Your Own Deck
-              </Button>
-            </motion.div>
-          </Group>
-        </Paper>
-      </motion.div>{" "}
+      <DeckHeader
+        deckId={deckId!}
+        onButtonClick={() => navigate("/")}
+        animated={true}
+      />
       {/* Hero Section */}
-      <motion.div
-        initial="initial"
-        animate="animate"
-        variants={heroAnimations.title}
-      >
-        <Paper shadow="sm" p="xl" radius="md" mb="xl" bg="indigo.0">
-          <Stack gap="md" align="center" ta="center">
-            <motion.div variants={heroAnimations.badge}>
-              <Badge size="lg" variant="filled" color="indigo">
-                Investment Opportunity
-              </Badge>
-            </motion.div>
-            <motion.div variants={heroAnimations.title}>
-              <Title order={1} size="h1" c="indigo">
-                {formData.projectName}
-              </Title>
-            </motion.div>
-            <motion.div variants={heroAnimations.title}>
-              <Text size="lg" c="dimmed">
-                {formData.address}
-              </Text>
-            </motion.div>
-            <motion.div
-              variants={heroAnimations.metrics}
-              initial="initial"
-              animate="animate"
-            >
-              <Group gap="xl" mt="md">
-                <motion.div variants={staggerItem}>
-                  <Stack gap={4} align="center">
-                    <Text size="sm" c="dimmed" fw={500}>
-                      Purchase Price
-                    </Text>
-                    <Text size="xl" fw={700} c="indigo">
-                      <NumberCounter
-                        value={formData.purchasePrice}
-                        prefix="$"
-                        duration={1.2}
-                      />
-                    </Text>
-                  </Stack>
-                </motion.div>
-                <motion.div variants={staggerItem}>
-                  <Stack gap={4} align="center">
-                    <Text size="sm" c="dimmed" fw={500}>
-                      Equity Raise
-                    </Text>
-                    <Text size="xl" fw={700} c="indigo">
-                      <NumberCounter
-                        value={formData.totalRaise}
-                        prefix="$"
-                        duration={1.4}
-                      />
-                    </Text>
-                  </Stack>
-                </motion.div>
-                <motion.div variants={staggerItem}>
-                  <Stack gap={4} align="center">
-                    <Text size="sm" c="dimmed" fw={500}>
-                      Target IRR
-                    </Text>
-                    <Text size="xl" fw={700} c="indigo">
-                      {formData.targetIrr}
-                    </Text>
-                  </Stack>
-                </motion.div>
-                <motion.div variants={staggerItem}>
-                  <Stack gap={4} align="center">
-                    <Text size="sm" c="dimmed" fw={500}>
-                      Hold Period
-                    </Text>
-                    <Text size="xl" fw={700} c="indigo">
-                      {formData.holdPeriod}
-                    </Text>
-                  </Stack>
-                </motion.div>
-              </Group>
-            </motion.div>
-          </Stack>
-        </Paper>
-      </motion.div>{" "}
+      <HeroSection
+        formData={formData}
+        formatCurrency={formatCurrency}
+        animated={true}
+      />
       {/* Content Sections */}
       <Stack gap="xl">
         {/* Executive Summary */}
-        <AnimatedSection delay={0.2}>
-          <motion.div {...paperHover}>
-            <Paper shadow="sm" p="xl" radius="md">
-              <Stack gap="md">
-                <Title order={2} c="indigo">
-                  Executive Summary
-                </Title>
-                <MarkdownRenderer content={generatedContent.executiveSummary} />
-              </Stack>
-            </Paper>
-          </motion.div>
-        </AnimatedSection>
+        <ContentSection
+          title="Executive Summary"
+          content={generatedContent.executiveSummary}
+          animated={true}
+          delay={0.2}
+        />
         {/* Investment Thesis & Deal Metrics */}
-        <motion.div
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true, amount: 0.2 }}
-          variants={staggerContainer}
-        >
-          <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl">
-            <motion.div variants={slideInLeft} {...paperHover}>
-              <Paper shadow="sm" p="xl" radius="md" h="100%">
-                <Stack gap="md">
-                  <Title order={2} c="indigo">
-                    Investment Thesis
-                  </Title>
-                  <MarkdownRenderer
-                    content={generatedContent.investmentThesis}
-                  />
-                </Stack>
-              </Paper>
-            </motion.div>
-            <motion.div variants={slideInRight} {...paperHover}>
-              <Paper shadow="sm" p="xl" radius="md" h="100%">
-                <Stack gap="md">
-                  <Title order={2} c="indigo">
-                    Deal Metrics
-                  </Title>
-                  <Stack gap="sm">
-                    <Group justify="space-between">
-                      <Text fw={500}>Investment Type:</Text>
-                      <Badge variant="light">{formData.investmentType}</Badge>
-                    </Group>
-                    <Group justify="space-between">
-                      <Text fw={500}>Purchase Price:</Text>
-                      <Text>{formatCurrency(formData.purchasePrice)}</Text>
-                    </Group>
-                    <Group justify="space-between">
-                      <Text fw={500}>Equity Raise:</Text>
-                      <Text>{formatCurrency(formData.totalRaise)}</Text>
-                    </Group>
-                    <Group justify="space-between">
-                      <Text fw={500}>Target IRR:</Text>
-                      <Text>{formData.targetIrr}</Text>
-                    </Group>
-                    <Group justify="space-between">
-                      <Text fw={500}>Hold Period:</Text>
-                      <Text>{formData.holdPeriod}</Text>
-                    </Group>
-                  </Stack>
-                </Stack>
-              </Paper>
-            </motion.div>
-          </SimpleGrid>
-        </motion.div>
+        <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl">
+          <InvestmentThesis
+            investmentThesis={generatedContent.investmentThesis}
+            animated={true}
+          />
+          <DealMetrics
+            formData={formData}
+            dealMetrics={calculateDealMetrics(formData)}
+            formatCurrency={formatCurrency}
+            getRiskColor={getRiskColor}
+            animated={true}
+          />
+        </SimpleGrid>{" "}
         {/* Location & Risk Factors */}
-        <motion.div
-          initial="initial"
-          whileInView="animate"
-          viewport={{ once: true, amount: 0.2 }}
-          variants={staggerContainer}
-        >
-          <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl" h="100%">
-            <motion.div variants={slideInLeft} {...paperHover}>
-              <Paper shadow="sm" p="xl" radius="md">
-                <Stack gap="md">
-                  <Title order={2} c="indigo">
-                    Location Overview
-                  </Title>
-                  <MarkdownRenderer
-                    content={generatedContent.locationOverview}
-                  />
-                </Stack>
-              </Paper>
-            </motion.div>
-            <motion.div variants={slideInRight} {...paperHover}>
-              <Paper shadow="sm" p="xl" radius="md" h="100%">
-                <Stack gap="md">
-                  <Title order={2} c="indigo">
-                    Risk Factors
-                  </Title>
-                  <motion.div
-                    variants={listVariants}
-                    initial="hidden"
-                    whileInView="visible"
-                    viewport={{ once: true }}
-                  >
-                    <Stack gap="xs">
-                      {generatedContent.riskFactors.map((risk, index) => (
-                        <motion.div key={index} variants={listItemVariants}>
-                          <Text size="sm">• {risk}</Text>
-                        </motion.div>
-                      ))}
-                    </Stack>
-                  </motion.div>
-                </Stack>
-              </Paper>
-            </motion.div>
-          </SimpleGrid>
-        </motion.div>{" "}
+        <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl">
+          <LocationOverview
+            locationOverview={generatedContent.locationOverview}
+            animated={true}
+          />
+          <RiskFactors
+            riskFactors={generatedContent.riskFactors}
+            animated={true}
+          />
+        </SimpleGrid>
+        {/* Investment Description */}
         {/* Location Snapshot - Enhanced with AI tone */}
-        <AnimatedSection delay={0.4}>
-          <motion.div {...paperHover}>
-            <Paper shadow="sm" p="xl" radius="md">
-              <Stack gap="md">
-                <Title order={2} c="indigo">
-                  Location Snapshot
-                </Title>
-                <MarkdownRenderer content={generatedContent.locationSnapshot} />
-              </Stack>
-            </Paper>
-          </motion.div>
-        </AnimatedSection>
+        <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl">
+          <ContentSection
+            title="Location Snapshot"
+            content={generatedContent.locationSnapshot}
+            animated={true}
+            delay={0.4}
+          />
+        </SimpleGrid>
+        {/* Investment Description */}
         {/* Location Map with Zillow Links */}
-        <AnimatedSection delay={0.2}>
+        <AnimatedWrapper animated={true} delay={0.2}>
           <LocationMap address={formData.address} />
-        </AnimatedSection>
+        </AnimatedWrapper>
         {/* Market Trends Analysis */}
-        <AnimatedSection delay={0.3}>
+        <AnimatedWrapper animated={true} delay={0.3}>
           <MarketTrendsChart data={generatedContent.marketTrends} />
-        </AnimatedSection>
+        </AnimatedWrapper>
         {/* Comparable Properties */}
-        <AnimatedSection delay={0.4}>
+        <AnimatedWrapper animated={true} delay={0.4}>
           <ComparableProperties
             properties={generatedContent.comparableProperties}
           />
-        </AnimatedSection>
+        </AnimatedWrapper>
         {/* ROI Simulator */}
-        <AnimatedSection delay={0.5}>
+        <AnimatedWrapper animated={true} delay={0.5}>
           <ROISimulator
             purchasePrice={formData.purchasePrice}
             initialRent={Math.floor(formData.purchasePrice * 0.008)} // Estimate 0.8% of purchase price as monthly rent
           />
-        </AnimatedSection>
+        </AnimatedWrapper>
         {/* Sponsor Information */}
-        <AnimatedSection delay={0.6}>
-          <motion.div {...paperHover}>
-            <Paper shadow="sm" p="xl" radius="md">
-              <Stack gap="md">
-                <Title order={2} c="indigo">
-                  Sponsor Information
-                </Title>
-                <MarkdownRenderer content={generatedContent.sponsorBio} />
-              </Stack>
-            </Paper>
-          </motion.div>
-        </AnimatedSection>
+        <ContentSection
+          title="Sponsor Information"
+          content={generatedContent.sponsorBio}
+          animated={true}
+          delay={0.6}
+        />
         {/* Contact Footer */}
-        <AnimatedSection delay={0.7}>
-          <motion.div {...paperHover}>
-            <Paper shadow="sm" p="xl" radius="md" bg="gray.0">
-              <Stack gap="md" align="center" ta="center">
-                <Title order={3}>Interested in This Investment?</Title>
-                <Text c="dimmed">
-                  Contact the sponsor for more information and investment
-                  documentation
-                </Text>
-                <motion.div
-                  {...buttonHover}
-                  animate={shouldReduceMotion ? {} : pulseCTA}
-                >
-                  <Button variant="filled" size="lg">
-                    Contact Sponsor
-                  </Button>
-                </motion.div>
-              </Stack>
-            </Paper>
-          </motion.div>
-        </AnimatedSection>
+        <ContactFooter animated={true} delay={0.7} />
       </Stack>
       {/* Footer */}
-      <AnimatedSection delay={0.8}>
+      <AnimatedWrapper animated={true} delay={0.8}>
         <Box mt="xl" pt="xl" style={{ borderTop: "1px solid #e9ecef" }}>
           <Group justify="center">
             <Text size="sm" c="dimmed">
               Powered by PitchSite - Made by Taylor Morse
             </Text>
-            <motion.div {...buttonHover}>
+            <AnimatedWrapper animated={true} withHover={true}>
               <Button
                 variant="subtle"
                 size="compact-sm"
@@ -430,10 +266,10 @@ export default function SharePage() {
               >
                 Create your own pitch deck
               </Button>
-            </motion.div>
+            </AnimatedWrapper>
           </Group>
         </Box>
-      </AnimatedSection>
+      </AnimatedWrapper>
     </>
   );
 }

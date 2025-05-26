@@ -47,7 +47,7 @@ export default function ComparableProperties({
                     <Text fw={600} size="sm">
                       {property.address}
                     </Text>
-                    <Badge variant="light" color="indigo">
+                    <Badge variant="light" color="gold">
                       {property.price}
                     </Badge>
                   </Group>

@@ -77,7 +77,7 @@ export default function ROISimulator({
                 { value: 8, label: "8%" },
               ]}
             />
-          </div>{" "}
+          </div>
           <div>
             <Text size="sm" fw={500} mb="xs">
               Monthly Rent: {formatFullCurrency(monthlyRent)}
@@ -138,7 +138,7 @@ export default function ROISimulator({
                   duration={0.8}
                 />
               </Text>
-            </Group>{" "}
+            </Group>
             <Group justify="space-between">
               <Text size="sm">Total Return:</Text>
               <Text
@@ -150,7 +150,7 @@ export default function ROISimulator({
                   value={roi.totalReturn}
                   prefix="$"
                   duration={0.8}
-                />{" "}
+                />
                 ({formatPercentWithDecimals(roi.totalReturnPercent, 1)})
               </Text>
             </Group>
