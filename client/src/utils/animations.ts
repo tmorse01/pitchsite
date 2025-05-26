@@ -16,21 +16,21 @@ export const delays = {
 
 // Standard fade in up animation for sections
 export const fadeInUp = {
-  initial: { opacity: 0, y: 60 },
+  initial: { opacity: 0, y: 30 },
   animate: { opacity: 1, y: 0 },
   transition: { duration: timings.medium, ease: globalEasing },
 };
 
 // Slide in from left
 export const slideInLeft = {
-  initial: { opacity: 0, x: -60 },
+  initial: { opacity: 0, x: -30 },
   animate: { opacity: 1, x: 0 },
   transition: { duration: timings.medium, ease: globalEasing },
 };
 
 // Slide in from right
 export const slideInRight = {
-  initial: { opacity: 0, x: 60 },
+  initial: { opacity: 0, x: 30 },
   animate: { opacity: 1, x: 0 },
   transition: { duration: timings.medium, ease: globalEasing },
 };
@@ -38,22 +38,22 @@ export const slideInRight = {
 // Hero section animations
 export const heroAnimations = {
   badge: {
-    initial: { scale: 0, rotate: -180 },
+    initial: { scale: 0, rotate: -90 },
     animate: { scale: 1, rotate: 0 },
     transition: {
       delay: delays.section,
       type: "spring",
-      stiffness: 260,
-      damping: 20,
+      stiffness: 200,
+      damping: 25,
     },
   },
   title: {
-    initial: { opacity: 0, y: 30 },
+    initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
     transition: { delay: delays.hero, duration: 0.8 },
   },
   metrics: {
-    initial: { opacity: 0, scale: 0.8 },
+    initial: { opacity: 0, scale: 0.9 },
     animate: { opacity: 1, scale: 1 },
     transition: {
       delay: 0.6,
@@ -74,7 +74,7 @@ export const staggerContainer = {
 
 // Stagger items for grids
 export const staggerItem = {
-  initial: { opacity: 0, y: 30 },
+  initial: { opacity: 0, y: 20 },
   animate: { opacity: 1, y: 0 },
   transition: { duration: 0.5 },
 };
@@ -82,16 +82,16 @@ export const staggerItem = {
 // Paper hover effects
 export const paperHover = {
   whileHover: {
-    scale: 1.02,
-    boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
+    scale: 1.01,
+    boxShadow: "0 8px 25px rgba(0,0,0,0.08)",
   },
   transition: { type: "spring", stiffness: 300 },
 };
 
 // Button interactions
 export const buttonHover = {
-  whileHover: { scale: 1.05 },
-  whileTap: { scale: 0.95 },
+  whileHover: { scale: 1.03 },
+  whileTap: { scale: 0.97 },
   transition: { type: "spring", stiffness: 400, damping: 17 },
 };
 
@@ -107,15 +107,15 @@ export const listVariants = {
 };
 
 export const listItemVariants = {
-  hidden: { opacity: 0, x: -20 },
+  hidden: { opacity: 0, x: -10 },
   visible: { opacity: 1, x: 0 },
 };
 
 // Call-to-action pulse
 export const pulseCTA = {
-  scale: [1, 1.05, 1],
+  scale: [1, 1.02, 1],
   transition: {
-    duration: 2,
+    duration: 2.5,
     repeat: Infinity,
     repeatType: "reverse" as const,
   },
@@ -125,7 +125,7 @@ export const pulseCTA = {
 export const getResponsiveVariants = (isMobile: boolean) => ({
   initial: {
     opacity: 0,
-    y: isMobile ? 30 : 60,
+    y: isMobile ? 20 : 30,
   },
   animate: {
     opacity: 1,
