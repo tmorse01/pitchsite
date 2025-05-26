@@ -37,17 +37,17 @@ export default function CreatePage() {
   const navigate = useNavigate();
   const form = useForm<FormData>({
     initialValues: {
-      projectName: "Sunrise Apartments",
-      address: "123 Main Street, Austin, TX 78704",
-      investmentType: "Multifamily",
-      purchasePrice: 2500000,
-      totalRaise: 750000,
-      targetIrr: "18%",
-      holdPeriod: "5 years",
+      projectName: "Fletcher Landing Waterfront Estate",
+      address: "5482 Fletcher Landing NE, Bainbridge Island, WA 98110",
+      investmentType: "Single Family Flip",
+      purchasePrice: 4398000,
+      totalRaise: 1100000,
+      targetIrr: "22%",
+      holdPeriod: "3 years",
       description:
-        "A 24-unit multifamily property in a rapidly growing neighborhood with strong rental demand. The property features modern amenities and is located near major employment centers and universities.",
+        "Stunning single-level waterfront home on Fletcher Bay that lives like a luxury resort. This opulent 3,010 sqft home was rebuilt to the studs in 2018 and features light-filled interiors with exquisite designer finishes, walls of windows showcasing dramatic Puget Sound & Olympic Mountain views, chef's kitchen with Wolf/Subzero appliances, wine room, waterside primary suite, and a private dock. The property offers exceptional outdoor entertaining spaces with tiers of decks cascading down to the water.",
       sponsorBio:
-        "John Smith has over 15 years of experience in real estate development and property management. He has successfully completed over $50M in real estate transactions and specializes in value-add multifamily properties.",
+        "John Smith has over 15 years of experience in real estate development and property management. He has successfully completed over $50M in real estate transactions and specializes in luxury waterfront properties and high-end single family renovations.",
       image: null,
       tone: "Professional",
     },
