@@ -11,7 +11,7 @@ import "./App.css";
 
 function App() {
   return (
-    <MantineProvider theme={theme}>
+    <MantineProvider defaultColorScheme="light" theme={theme}>
       <PasswordGate>
         <Router>
           <Layout>

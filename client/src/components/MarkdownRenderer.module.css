@@ -1,0 +1,177 @@
+/* Base markdown content styling */
+.markdownContent {
+  line-height: 1.6;
+  color: var(--mantine-color-gray-8);
+}
+
+/* Size variants */
+.sm {
+  font-size: 0.875rem; /* 14px */
+}
+
+.md {
+  font-size: 1rem; /* 16px */
+}
+
+.lg {
+  font-size: 1.125rem; /* 18px */
+}
+
+/* Headings */
+.heading1 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 1.5rem 0 1rem 0;
+  background: linear-gradient(
+    135deg,
+    var(--mantine-color-royal-7) 0%,
+    var(--mantine-color-royal-9) 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  line-height: 1.2;
+}
+
+.heading2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin: 1.25rem 0 0.75rem 0;
+  color: var(--mantine-color-indigo-7);
+  line-height: 1.3;
+}
+
+.heading3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 1rem 0 0.5rem 0;
+  color: var(--mantine-color-indigo-6);
+  line-height: 1.4;
+}
+
+/* Paragraphs */
+.paragraph {
+  margin: 0.75rem 0;
+  line-height: 1.6;
+  color: var(--mantine-color-gray-7);
+}
+
+.paragraph:first-child {
+  margin-top: 0;
+}
+
+.paragraph:last-child {
+  margin-bottom: 0;
+}
+
+/* Lists */
+.unorderedList,
+.orderedList {
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+
+.listItem {
+  margin: 0.25rem 0;
+  line-height: 1.5;
+  color: var(--mantine-color-gray-7);
+}
+
+.unorderedList .listItem {
+  list-style-type: disc;
+}
+
+.unorderedList .listItem::marker {
+  color: var(--mantine-color-indigo-5);
+}
+
+/* Text formatting */
+.bold {
+  font-weight: 600;
+  color: var(--mantine-color-gray-8);
+}
+
+.italic {
+  font-style: italic;
+  color: var(--mantine-color-gray-7);
+}
+
+/* Blockquotes */
+.blockquote {
+  margin: 1rem 0;
+  padding: 1rem 1.5rem;
+  border-left: 4px solid var(--mantine-color-indigo-4);
+  background-color: var(--mantine-color-indigo-0);
+  border-radius: 0 8px 8px 0;
+  font-style: italic;
+  color: var(--mantine-color-gray-7);
+}
+
+.blockquote p {
+  margin: 0;
+}
+
+/* Code */
+.inlineCode {
+  background-color: var(--mantine-color-gray-1);
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: 4px;
+  padding: 0.125rem 0.25rem;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 0.875em;
+  color: var(--mantine-color-gray-8);
+}
+
+.codeBlock {
+  display: block;
+  background-color: var(--mantine-color-gray-1);
+  border: 1px solid var(--mantine-color-gray-3);
+  border-radius: 8px;
+  padding: 1rem;
+  font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+  font-size: 0.875rem;
+  color: var(--mantine-color-gray-8);
+  overflow-x: auto;
+  white-space: pre;
+  margin: 1rem 0;
+}
+
+/* Links */
+.link {
+  color: var(--mantine-color-indigo-6);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.link:hover {
+  color: var(--mantine-color-indigo-7);
+  border-bottom-color: var(--mantine-color-indigo-4);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .heading1 {
+    font-size: 1.75rem;
+  }
+
+  .heading2 {
+    font-size: 1.375rem;
+  }
+
+  .heading3 {
+    font-size: 1.125rem;
+  }
+
+  .sm {
+    font-size: 0.8125rem; /* 13px */
+  }
+
+  .md {
+    font-size: 0.9375rem; /* 15px */
+  }
+
+  .lg {
+    font-size: 1.0625rem; /* 17px */
+  }
+}

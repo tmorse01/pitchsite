@@ -121,26 +121,40 @@ function generateExecutiveSummaryFallback(data: RequestBody): string {
   } = data;
 
   const toneIntros = {
-    Professional: `${projectName} represents a compelling`,
-    Persuasive: `${projectName} presents an exceptional`,
-    "Data-Driven": `${projectName} offers a quantifiably attractive`,
+    Professional: `**${projectName}** represents a compelling`,
+    Persuasive: `**${projectName}** presents an *exceptional*`,
+    "Data-Driven": `**${projectName}** offers a *quantifiably attractive*`,
   };
 
   const intro =
     toneIntros[tone as keyof typeof toneIntros] || toneIntros.Professional;
 
-  return `${intro} ${investmentType.toLowerCase()} investment opportunity with a total acquisition cost of ${formatCurrency(
+  return `${intro} ${investmentType.toLowerCase()} investment opportunity with a total acquisition cost of **${formatCurrency(
     purchasePrice
-  )}. This project seeks to raise ${formatCurrency(
-    equityRaise
-  )} in equity capital to execute a ${holdPeriod} business plan targeting a ${targetIrr} IRR. The investment strategy focuses on value creation through strategic improvements and market positioning, leveraging current market conditions and the sponsor's proven track record in similar investments.`;
+  )}**. 
+
+**Key Investment Highlights:**
+- Total equity raise: **${formatCurrency(equityRaise)}**
+- Target IRR: **${targetIrr}**
+- Investment timeline: **${holdPeriod}**
+
+This project leverages *strategic market positioning* and the sponsor's proven track record to deliver strong returns through value creation and operational excellence.`;
 }
 
 function generateInvestmentThesisFallback(data: RequestBody): string {
   const { investmentType, address } = data;
   const location = address.split(",").pop()?.trim() || "the target market";
 
-  return `This ${investmentType.toLowerCase()} investment capitalizes on strong fundamentals in ${location}, including population growth, job creation, and limited new supply. The property's strategic location provides excellent access to major employment centers and transportation corridors. Our value-add strategy will enhance the asset's competitive position while generating stable cash flow and long-term appreciation for investors.`;
+  return `## Investment Strategy
+
+This **${investmentType.toLowerCase()} investment** capitalizes on strong market fundamentals in *${location}*, including:
+
+- **Population growth** and job creation driving demand
+- **Limited new supply** creating favorable market conditions  
+- **Strategic location** with excellent access to employment centers
+- **Transportation corridors** enhancing long-term value
+
+Our *value-add strategy* will enhance the asset's competitive position while generating **stable cash flow** and **long-term appreciation** for investors through targeted improvements and operational optimization.`;
 }
 
 function generateRiskFactorsFallback(data: RequestBody): string[] {
@@ -169,7 +183,17 @@ function generateLocationOverviewFallback(data: RequestBody): string {
   const { address } = data;
   const location = address.split(",").pop()?.trim() || "the target location";
 
-  return `${location} is experiencing robust economic growth driven by diverse industry sectors and population expansion. The area benefits from excellent infrastructure, including major highways, public transportation, and proximity to key employment centers. Recent developments in the region have attracted both businesses and residents, creating a strong foundation for real estate investment returns. The local market demonstrates resilience and continues to show positive trends in both rental rates and property values.`;
+  return `## Market Overview
+
+**${location}** is experiencing *robust economic growth* driven by diverse industry sectors and population expansion. 
+
+### Key Economic Drivers:
+- **Excellent infrastructure** including major highways and public transportation
+- **Proximity to key employment centers** and educational institutions
+- **Recent developments** attracting both businesses and residents
+- **Strong rental demand** with below-average vacancy rates
+
+The local market demonstrates **exceptional resilience** and continues to show *positive trends* in both rental rates and property values, creating a strong foundation for sustained real estate investment returns.`;
 }
 
 function generateLocationSnapshotFallback(data: RequestBody): string {
@@ -178,17 +202,27 @@ function generateLocationSnapshotFallback(data: RequestBody): string {
 
   const toneStyle = {
     Professional:
-      "demonstrates strong market fundamentals with consistent growth patterns",
+      "demonstrates **strong market fundamentals** with *consistent growth patterns*",
     Persuasive:
-      "presents an exceptional opportunity with compelling growth indicators",
+      "presents an **exceptional opportunity** with *compelling growth indicators*",
     "Data-Driven":
-      "exhibits quantifiable growth metrics and favorable demographic trends",
+      "exhibits **quantifiable growth metrics** and *favorable demographic trends*",
   };
 
   const style =
     toneStyle[tone as keyof typeof toneStyle] || toneStyle.Professional;
 
-  return `${location} ${style}. The area features a growing population base, diverse employment opportunities across technology, healthcare, and finance sectors, and ongoing infrastructure improvements. Recent market analysis indicates sustained rental demand with vacancy rates below regional averages. The location's proximity to major universities and employment centers ensures consistent tenant demand and strong long-term appreciation potential.`;
+  return `## Location Snapshot
+
+**${location}** ${style}. 
+
+### Market Highlights:
+- **Growing population base** with diverse demographics
+- **Employment opportunities** across technology, healthcare, and finance sectors
+- **Ongoing infrastructure improvements** enhancing connectivity
+- **Below-average vacancy rates** indicating strong rental demand
+
+The location's *proximity to major universities* and employment centers ensures **consistent tenant demand** and strong long-term appreciation potential, making it an ideal target for real estate investment.`;
 }
 
 function generateComparableProperties(data: RequestBody): ComparableProperty[] {
@@ -253,8 +287,18 @@ function generateMarketTrends(data: RequestBody): MarketTrendsData {
 function generateSponsorBioFallback(data: RequestBody): string {
   const originalBio = data.sponsorBio;
 
-  // Enhance the provided bio with professional language
-  return `${originalBio} With a proven track record in real estate investment and development, the sponsor team brings extensive market knowledge and operational expertise to this opportunity. Their hands-on approach to asset management and strong relationships with local contractors, brokers, and financial institutions position them to execute the business plan successfully and deliver strong returns to investors.`;
+  // Enhance the provided bio with professional language and markdown
+  return `## Sponsor Profile
+
+${originalBio}
+
+### Key Qualifications:
+- **Proven track record** in real estate investment and development
+- **Extensive market knowledge** and operational expertise
+- **Strong relationships** with local contractors, brokers, and financial institutions
+- **Hands-on approach** to asset management and value creation
+
+The sponsor team's *comprehensive experience* and **strategic partnerships** position them to execute the business plan successfully and deliver **strong returns** to investors.`;
 }
 
 function formatCurrency(amount: number): string {
@@ -298,19 +342,41 @@ Description: ${description}
 Sponsor Bio: ${sponsorBio}
 Content Tone: ${tone}
 
-Please provide the following sections in JSON format:
+Please provide the following sections in JSON format with markdown-formatted content for rich text display:
 
-1. executiveSummary: A compelling 3-4 sentence executive summary in a ${tone.toLowerCase()} tone
-2. investmentThesis: A detailed investment thesis (3-4 sentences) explaining why this is a good investment
-3. locationOverview: A professional overview of ${location} focusing on real estate demand, population growth, and economic development (3-4 sentences)
-4. locationSnapshot: A ${tone.toLowerCase()} location analysis highlighting growth metrics and demographic trends (3-4 sentences)
-5. enhancedSponsorBio: Enhance the provided sponsor bio with professional language (keep original content but make it more compelling)
-6. riskFactors: Array of 5 relevant risk factors for this type of investment
+1. executiveSummary: A compelling executive summary in a ${tone.toLowerCase()} tone. Use markdown formatting with **bold** for key metrics, *emphasis* for important points, and bullet points for key highlights. Include 3-4 sentences with rich formatting.
+
+2. investmentThesis: A detailed investment thesis explaining why this is a good investment. Use markdown with:
+   - **Bold** for key value propositions
+   - Bullet points for main arguments
+   - *Emphasis* for market advantages
+   - 3-4 well-structured paragraphs
+
+3. locationOverview: A professional overview of ${location} focusing on real estate demand, population growth, and economic development. Use markdown formatting with:
+   - **Bold** for key location benefits
+   - Bullet points for major economic drivers
+   - *Emphasis* for growth indicators
+   - 3-4 paragraphs with rich formatting
+
+4. locationSnapshot: A ${tone.toLowerCase()} location analysis highlighting growth metrics and demographic trends. Use markdown with:
+   - **Bold** for key statistics
+   - Bullet points for demographic highlights
+   - *Emphasis* for market trends
+   - Rich formatting throughout
+
+5. enhancedSponsorBio: Enhance the provided sponsor bio with professional language and markdown formatting:
+   - **Bold** for key achievements and experience
+   - *Emphasis* for specializations
+   - Bullet points for major accomplishments
+   - Keep original content but make it more compelling with rich formatting
+
+6. riskFactors: Array of 5 relevant risk factors for this type of investment (keep as plain text strings for bullet point display)
+
 7. comparableProperties: Array of 3 comparable properties with realistic addresses, prices around ${formatCurrency(
       purchasePrice
-    )}, distances, and notes
+    )}, distances, and notes (keep as objects for structured display)
 
-Return only a valid JSON object with these fields. Do not wrap the response in markdown code blocks or any other formatting - return raw JSON only.`;
+Return only a valid JSON object with these fields. The text fields should contain markdown formatting for rich display. Do not wrap the response in markdown code blocks - return raw JSON only.`;
 
     const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({

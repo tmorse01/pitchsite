@@ -1,4 +1,12 @@
-import { Paper, Title, Text, Stack, Slider, Group, NumberFormatter } from "@mantine/core";
+import {
+  Paper,
+  Title,
+  Text,
+  Stack,
+  Slider,
+  Group,
+  NumberFormatter,
+} from "@mantine/core";
 import { useState } from "react";
 
 interface ROISimulatorProps {
@@ -6,7 +14,10 @@ interface ROISimulatorProps {
   initialRent: number;
 }
 
-export default function ROISimulator({ purchasePrice, initialRent }: ROISimulatorProps) {
+export default function ROISimulator({
+  purchasePrice,
+  initialRent,
+}: ROISimulatorProps) {
   const [exitCapRate, setExitCapRate] = useState(5.5);
   const [monthlyRent, setMonthlyRent] = useState(initialRent);
   const [holdPeriod, setHoldPeriod] = useState(5);
@@ -14,18 +25,21 @@ export default function ROISimulator({ purchasePrice, initialRent }: ROISimulato
   // Simplified ROI calculation
   const calculateROI = () => {
     const annualRent = monthlyRent * 12;
-    const exitValue = annualRent / (exitCapRate / 100);
+    const exitValue = Number((annualRent / (exitCapRate / 100)).toFixed(2));
     const totalRentReceived = annualRent * holdPeriod;
-    const totalReturn = exitValue + totalRentReceived - purchasePrice;
+    const totalReturn = Number(
+      (exitValue + totalRentReceived - purchasePrice).toFixed(2)
+    );
     const totalReturnPercent = (totalReturn / purchasePrice) * 100;
-    const annualizedReturn = Math.pow(1 + (totalReturn / purchasePrice), 1 / holdPeriod) - 1;
-    
+    const annualizedReturn =
+      Math.pow(1 + totalReturn / purchasePrice, 1 / holdPeriod) - 1;
+
     return {
       exitValue,
       totalReturn,
       totalReturnPercent,
       annualizedReturn: annualizedReturn * 100,
-      equityMultiple: (exitValue + totalRentReceived) / purchasePrice
+      equityMultiple: (exitValue + totalRentReceived) / purchasePrice,
     };
   };
 
@@ -37,7 +51,7 @@ export default function ROISimulator({ purchasePrice, initialRent }: ROISimulato
         <Title order={2} c="indigo">
           ROI Simulator
         </Title>
-        
+
         <Text size="sm" c="dimmed">
           Adjust parameters to see projected returns
         </Text>
@@ -72,9 +86,15 @@ export default function ROISimulator({ purchasePrice, initialRent }: ROISimulato
               max={initialRent * 1.5}
               step={100}
               marks={[
-                { value: initialRent * 0.8, label: `$${Math.floor(initialRent * 0.8 / 100) * 100}` },
+                {
+                  value: initialRent * 0.8,
+                  label: `$${Math.floor((initialRent * 0.8) / 100) * 100}`,
+                },
                 { value: initialRent, label: `$${initialRent}` },
-                { value: initialRent * 1.5, label: `$${Math.floor(initialRent * 1.5 / 100) * 100}` },
+                {
+                  value: initialRent * 1.5,
+                  label: `$${Math.floor((initialRent * 1.5) / 100) * 100}`,
+                },
               ]}
             />
           </div>
@@ -100,17 +120,31 @@ export default function ROISimulator({ purchasePrice, initialRent }: ROISimulato
 
         <Paper bg="gray.0" p="md" radius="md">
           <Stack gap="sm">
-            <Text fw={600} c="indigo">Projected Results</Text>
+            <Text fw={600} c="indigo">
+              Projected Results
+            </Text>
             <Group justify="space-between">
               <Text size="sm">Exit Value:</Text>
               <Text size="sm" fw={500}>
-                <NumberFormatter value={roi.exitValue} prefix="$" thousandSeparator />
+                <NumberFormatter
+                  value={roi.exitValue}
+                  prefix="$"
+                  thousandSeparator
+                />
               </Text>
             </Group>
             <Group justify="space-between">
               <Text size="sm">Total Return:</Text>
-              <Text size="sm" fw={500} c={roi.totalReturn > 0 ? "green" : "red"}>
-                <NumberFormatter value={roi.totalReturn} prefix="$" thousandSeparator />
+              <Text
+                size="sm"
+                fw={500}
+                c={roi.totalReturn > 0 ? "green" : "red"}
+              >
+                <NumberFormatter
+                  value={roi.totalReturn}
+                  prefix="$"
+                  thousandSeparator
+                />
                 ({roi.totalReturnPercent.toFixed(1)}%)
               </Text>
             </Group>

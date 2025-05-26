@@ -14,6 +14,7 @@ import MarketTrendsChart from "../components/MarketTrendsChart";
 import ComparableProperties from "../components/ComparableProperties";
 import LocationMap from "../components/LocationMap";
 import ROISimulator from "../components/ROISimulator";
+import MarkdownRenderer from "../components/MarkdownRenderer";
 
 interface PitchData {
   formData: {
@@ -138,26 +139,27 @@ export default function PreviewPage() {
 
       {/* Content Sections */}
       <Stack gap="xl">
+        {" "}
         {/* Executive Summary */}
         <Paper shadow="sm" p="xl" radius="md">
           <Stack gap="md">
             <Title order={2} c="indigo">
               Executive Summary
             </Title>
-            <Text>{generatedContent.executiveSummary}</Text>
+            <MarkdownRenderer content={generatedContent.executiveSummary} />
           </Stack>
         </Paper>
         {/* Investment Thesis & Deal Metrics */}
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl">
+          {" "}
           <Paper shadow="sm" p="xl" radius="md" h="fit-content">
             <Stack gap="md">
               <Title order={2} c="indigo">
                 Investment Thesis
               </Title>
-              <Text>{generatedContent.investmentThesis}</Text>
+              <MarkdownRenderer content={generatedContent.investmentThesis} />
             </Stack>
           </Paper>
-
           <Paper shadow="sm" p="xl" radius="md" h="fit-content">
             <Stack gap="md">
               <Title order={2} c="indigo">
@@ -190,15 +192,15 @@ export default function PreviewPage() {
         </SimpleGrid>
         {/* Location & Risk Factors */}
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl">
+          {" "}
           <Paper shadow="sm" p="xl" radius="md">
             <Stack gap="md">
               <Title order={2} c="indigo">
                 Location Overview
               </Title>
-              <Text>{generatedContent.locationOverview}</Text>
+              <MarkdownRenderer content={generatedContent.locationOverview} />
             </Stack>
           </Paper>
-
           <Paper shadow="sm" p="xl" radius="md">
             <Stack gap="md">
               <Title order={2} c="indigo">
@@ -214,13 +216,13 @@ export default function PreviewPage() {
             </Stack>
           </Paper>
         </SimpleGrid>
-        {/* Location Snapshot - Enhanced with AI tone */}
+        {/* Location Snapshot - Enhanced with AI tone */}{" "}
         <Paper shadow="sm" p="xl" radius="md">
           <Stack gap="md">
             <Title order={2} c="indigo">
               Location Snapshot
             </Title>
-            <Text>{generatedContent.locationSnapshot}</Text>
+            <MarkdownRenderer content={generatedContent.locationSnapshot} />
           </Stack>
         </Paper>
         {/* Location Map with Zillow Links */}
@@ -236,13 +238,13 @@ export default function PreviewPage() {
           purchasePrice={formData.purchasePrice}
           initialRent={Math.floor(formData.purchasePrice * 0.008)} // Estimate 0.8% of purchase price as monthly rent
         />
-        {/* Sponsor Information */}
+        {/* Sponsor Information */}{" "}
         <Paper shadow="sm" p="xl" radius="md">
           <Stack gap="md">
             <Title order={2} c="indigo">
               Sponsor Information
             </Title>
-            <Text>{generatedContent.sponsorBio}</Text>
+            <MarkdownRenderer content={generatedContent.sponsorBio} />
           </Stack>
         </Paper>
         {/* Contact Footer */}
