@@ -33,12 +33,28 @@ app.use("/api", generateRouter);
 app.use("/api/pitch-decks", pitchDecksRouter);
 
 // Health check endpoint
-app.get("/health", (req: Request, res: Response) => {
-  res.json({
+app.get("/health", async (req: Request, res: Response) => {
+  const healthStatus = {
     status: "OK",
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || "development",
-  });
+    services: {
+      database: "unknown",
+    },
+  };
+
+  // Check database connection
+  try {
+    const { getDatabase } = await import("./db/connection.js");
+    const db = getDatabase();
+    await db.admin().ping();
+    healthStatus.services.database = "connected";
+  } catch (error) {
+    healthStatus.services.database = "disconnected";
+    console.warn("Health check: Database not available", error);
+  }
+
+  res.json(healthStatus);
 });
 
 // Root endpoint
@@ -80,7 +96,6 @@ app.listen(PORT, async () => {
   );
   console.log(`🔐 App Password: ${process.env.APP_PASSWORD || "Not Set"}`);
   console.log(`🔑 JWT Secret: ${process.env.JWT_SECRET ? "Set" : "Not Set"}`);
-
   // Connect to MongoDB
   try {
     console.log(`🗄️  MongoDB: Connecting...`);
@@ -88,8 +103,10 @@ app.listen(PORT, async () => {
     console.log(`🗄️  MongoDB: Connected successfully`);
   } catch (error) {
     console.error(`❌ MongoDB: Connection failed`, error);
-    if (process.env.NODE_ENV === "production") {
-      process.exit(1);
-    }
+    console.log(`⚠️  Server will continue running without database connection`);
+    console.log(
+      `🔧 Check MONGODB_URI environment variable and database status`
+    );
+    // Don't exit in production - let the server run for debugging
   }
 });
