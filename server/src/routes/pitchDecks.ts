@@ -30,10 +30,10 @@ router.post("/", async (req: Request, res: Response) => {
       userAgent
     );
 
-    res.status(201).json(result);
+    return res.status(201).json(result);
   } catch (error) {
     console.error("Error in POST /api/pitch-decks:", error);
-    res.status(500).json({
+    return res.status(500).json({
       error: "Failed to save pitch deck",
       message: error instanceof Error ? error.message : "Unknown error",
     });
@@ -57,7 +57,7 @@ router.get("/:shareId", async (req: Request, res: Response) => {
       password as string
     );
 
-    res.json(result);
+    return res.json(result);
   } catch (error) {
     console.error("Error in GET /api/pitch-decks/:shareId:", error);
 
@@ -70,7 +70,7 @@ router.get("/:shareId", async (req: Request, res: Response) => {
       }
     }
 
-    res.status(500).json({
+    return res.status(500).json({
       error: "Failed to retrieve pitch deck",
       message: error instanceof Error ? error.message : "Unknown error",
     });
@@ -90,7 +90,7 @@ router.patch("/:shareId/view", async (req: Request, res: Response) => {
     }
 
     const result = await getPitchDeckService().incrementViewCount(shareId);
-    res.json(result);
+    return res.json(result);
   } catch (error) {
     console.error("Error in PATCH /api/pitch-decks/:shareId/view:", error);
 
@@ -98,7 +98,7 @@ router.patch("/:shareId/view", async (req: Request, res: Response) => {
       return res.status(404).json({ error: error.message });
     }
 
-    res.status(500).json({
+    return res.status(500).json({
       error: "Failed to increment view count",
       message: error instanceof Error ? error.message : "Unknown error",
     });
