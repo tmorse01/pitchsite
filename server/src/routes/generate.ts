@@ -145,9 +145,7 @@ function generateInvestmentThesisFallback(data: RequestBody): string {
   const { investmentType, address } = data;
   const location = address.split(",").pop()?.trim() || "the target market";
 
-  return `## Investment Strategy
-
-This **${investmentType.toLowerCase()} investment** capitalizes on strong market fundamentals in *${location}*, including:
+  return `This **${investmentType.toLowerCase()} investment** capitalizes on strong market fundamentals in *${location}*, including:
 
 - **Population growth** and job creation driving demand
 - **Limited new supply** creating favorable market conditions  
@@ -183,11 +181,9 @@ function generateLocationOverviewFallback(data: RequestBody): string {
   const { address } = data;
   const location = address.split(",").pop()?.trim() || "the target location";
 
-  return `## Market Overview
+  return `**${location}** is experiencing *robust economic growth* driven by diverse industry sectors and population expansion. 
 
-**${location}** is experiencing *robust economic growth* driven by diverse industry sectors and population expansion. 
-
-### Key Economic Drivers:
+**Key Economic Drivers:**
 - **Excellent infrastructure** including major highways and public transportation
 - **Proximity to key employment centers** and educational institutions
 - **Recent developments** attracting both businesses and residents
@@ -212,11 +208,9 @@ function generateLocationSnapshotFallback(data: RequestBody): string {
   const style =
     toneStyle[tone as keyof typeof toneStyle] || toneStyle.Professional;
 
-  return `## Location Snapshot
+  return `**${location}** ${style}. 
 
-**${location}** ${style}. 
-
-### Market Highlights:
+**Market Highlights:**
 - **Growing population base** with diverse demographics
 - **Employment opportunities** across technology, healthcare, and finance sectors
 - **Ongoing infrastructure improvements** enhancing connectivity
@@ -288,11 +282,9 @@ function generateSponsorBioFallback(data: RequestBody): string {
   const originalBio = data.sponsorBio;
 
   // Enhance the provided bio with professional language and markdown
-  return `## Sponsor Profile
+  return `${originalBio}
 
-${originalBio}
-
-### Key Qualifications:
+**Key Qualifications:**
 - **Proven track record** in real estate investment and development
 - **Extensive market knowledge** and operational expertise
 - **Strong relationships** with local contractors, brokers, and financial institutions
@@ -342,33 +334,39 @@ Description: ${description}
 Sponsor Bio: ${sponsorBio}
 Content Tone: ${tone}
 
+IMPORTANT: The content will be displayed in sections that already have titles (Executive Summary, Investment Thesis, Deal Metrics, Location Overview, Location Snapshot, Sponsor Information). Do NOT include section headers like "## Executive Summary" or "## Investment Strategy" in your content. Generate the body content only.
+
 Please provide the following sections in JSON format with markdown-formatted content for rich text display:
 
-1. executiveSummary: A compelling executive summary in a ${tone.toLowerCase()} tone. Use markdown formatting with **bold** for key metrics, *emphasis* for important points, and bullet points for key highlights. Include 3-4 sentences with rich formatting.
+1. executiveSummary: A compelling executive summary in a ${tone.toLowerCase()} tone. Use markdown formatting with **bold** for key metrics, *emphasis* for important points, and bullet points for key highlights. Include 3-4 sentences with rich formatting. Do not include any headers - start directly with the content.
 
 2. investmentThesis: A detailed investment thesis explaining why this is a good investment. Use markdown with:
    - **Bold** for key value propositions
    - Bullet points for main arguments
    - *Emphasis* for market advantages
    - 3-4 well-structured paragraphs
+   - No section headers - content only
 
 3. locationOverview: A professional overview of ${location} focusing on real estate demand, population growth, and economic development. Use markdown formatting with:
    - **Bold** for key location benefits
    - Bullet points for major economic drivers
    - *Emphasis* for growth indicators
    - 3-4 paragraphs with rich formatting
+   - No section headers - content only
 
 4. locationSnapshot: A ${tone.toLowerCase()} location analysis highlighting growth metrics and demographic trends. Use markdown with:
    - **Bold** for key statistics
    - Bullet points for demographic highlights
    - *Emphasis* for market trends
    - Rich formatting throughout
+   - No section headers - content only
 
 5. enhancedSponsorBio: Enhance the provided sponsor bio with professional language and markdown formatting:
    - **Bold** for key achievements and experience
    - *Emphasis* for specializations
    - Bullet points for major accomplishments
    - Keep original content but make it more compelling with rich formatting
+   - No section headers - content only
 
 6. riskFactors: Array of 5 relevant risk factors for this type of investment (keep as plain text strings for bullet point display)
 
@@ -376,7 +374,7 @@ Please provide the following sections in JSON format with markdown-formatted con
       purchasePrice
     )}, distances, and notes (keep as objects for structured display)
 
-Return only a valid JSON object with these fields. The text fields should contain markdown formatting for rich display. Do not wrap the response in markdown code blocks - return raw JSON only.`;
+Return only a valid JSON object with these fields. The text fields should contain markdown formatting for rich display but NO section headers. Do not wrap the response in markdown code blocks - return raw JSON only.`;
 
     const openai = getOpenAIClient();
     const completion = await openai.chat.completions.create({
