@@ -16,7 +16,7 @@ export default function LocationMap({ address }: LocationMapProps) {
   };
   const generateMapEmbedUrl = (address: string) => {
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-
+    console.log("Google Maps API Key:", apiKey);
     if (apiKey) {
       // Use the official Google Maps Embed API with the API key
       return `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(
