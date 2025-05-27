@@ -15,7 +15,7 @@ import {
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useNavigate } from "react-router-dom";
-import { generatePitchDeck, testApi } from "../api/client";
+import { generatePitchDeck, testApi } from "../api";
 
 interface FormData {
   projectName: string;

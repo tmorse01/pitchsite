@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Text, Button, Group, Stack, SimpleGrid } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
-import { savePitchDeck } from "../api/client";
+import { savePitchDeck } from "../api";
 import MarketTrendsChart from "../components/MarketTrendsChart";
 import ComparableProperties from "../components/ComparableProperties";
 import LocationMap from "../components/LocationMap";

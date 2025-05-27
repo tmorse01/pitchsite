@@ -10,7 +10,7 @@ import {
   SimpleGrid,
   TextInput,
 } from "@mantine/core";
-import { getPitchDeck, incrementViewCount } from "../api/client";
+import { getPitchDeck, incrementViewCount } from "../api";
 import MarketTrendsChart from "../components/MarketTrendsChart";
 import ComparableProperties from "../components/ComparableProperties";
 import LocationMap from "../components/LocationMap";

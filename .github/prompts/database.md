@@ -134,7 +134,7 @@ Add the following Express routes to `server/src/routes/`:
 
 ### 3. Frontend Updates
 
-#### **Client API Service (`client/src/api/client.ts`)**
+#### **Client API Service (`client/src/api/*`)**
 
 Add new functions:
 
