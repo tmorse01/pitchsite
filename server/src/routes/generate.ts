@@ -113,110 +113,269 @@ function generateExecutiveSummaryFallback(data: RequestBody): string {
   const {
     projectName,
     investmentType,
-    purchasePrice,
-    equityRaise,
-    targetIrr,
-    holdPeriod,
+    address,
+    description,
     tone = "Professional",
   } = data;
 
-  const toneIntros = {
-    Professional: `**${projectName}** represents a compelling`,
-    Persuasive: `**${projectName}** presents an *exceptional*`,
-    "Data-Driven": `**${projectName}** offers a *quantifiably attractive*`,
+  const location = address.split(",").pop()?.trim() || "the target market";
+
+  const strategyTemplates = {
+    development: {
+      strategy: "ground-up development",
+      value: "capitalize on strong demand and limited supply",
+      execution:
+        "leverage proven development expertise and strategic partnerships",
+    },
+    flip: {
+      strategy: "value-add renovation",
+      value: "transform an underperforming asset",
+      execution: "implement targeted improvements to maximize market appeal",
+    },
+    rental: {
+      strategy: "income-generating acquisition",
+      value: "secure stable cash flow in a high-demand market",
+      execution: "optimize operations and enhance tenant satisfaction",
+    },
+    default: {
+      strategy: "strategic real estate investment",
+      value: "capitalize on favorable market conditions",
+      execution: "leverage market expertise and operational excellence",
+    },
   };
 
-  const intro =
-    toneIntros[tone as keyof typeof toneIntros] || toneIntros.Professional;
+  // Determine strategy based on investment type
+  let strategy = strategyTemplates.default;
+  const investmentLower = investmentType.toLowerCase();
+  if (
+    investmentLower.includes("development") ||
+    investmentLower.includes("build")
+  ) {
+    strategy = strategyTemplates.development;
+  } else if (
+    investmentLower.includes("flip") ||
+    investmentLower.includes("renovate")
+  ) {
+    strategy = strategyTemplates.flip;
+  } else if (
+    investmentLower.includes("rental") ||
+    investmentLower.includes("buy and hold")
+  ) {
+    strategy = strategyTemplates.rental;
+  }
 
-  return `${intro} ${investmentType.toLowerCase()} investment opportunity with a total acquisition cost of **${formatCurrency(
-    purchasePrice
-  )}**. 
+  const toneStyles = {
+    Professional: {
+      opening: `**${projectName}** represents a compelling **${strategy.strategy}** opportunity positioned to`,
+      emphasis: "strategic advantages",
+      conclusion: "disciplined execution",
+    },
+    Persuasive: {
+      opening: `**${projectName}** presents an *exceptional* **${strategy.strategy}** opportunity designed to`,
+      emphasis: "competitive advantages",
+      conclusion: "*proven execution capabilities*",
+    },
+    "Data-Driven": {
+      opening: `**${projectName}** offers a *quantifiably attractive* **${strategy.strategy}** opportunity structured to`,
+      emphasis: "measurable market advantages",
+      conclusion: "*data-driven execution approach*",
+    },
+  };
 
-**Key Investment Highlights:**
-- Total equity raise: **${formatCurrency(equityRaise)}**
-- Target IRR: **${targetIrr}**
-- Investment timeline: **${holdPeriod}**
+  const style =
+    toneStyles[tone as keyof typeof toneStyles] || toneStyles.Professional;
 
-This project leverages *strategic market positioning* and the sponsor's proven track record to deliver strong returns through value creation and operational excellence.`;
+  return `${style.opening} ${
+    strategy.value
+  } in the growing *${location}* market. ${
+    description
+      ? `*${description.slice(0, 100)}${description.length > 100 ? "..." : ""}*`
+      : ""
+  }
+
+**Value Creation Strategy:**
+- **Market positioning:** Prime location with strong demographic trends and economic growth
+- **Execution approach:** ${strategy.execution} to maximize returns
+- **Risk mitigation:** ${
+    style.emphasis
+  } including market knowledge and operational expertise
+
+This investment combines *favorable market fundamentals* with **proven investment strategies** to deliver attractive risk-adjusted returns through ${
+    style.conclusion
+  } and comprehensive market analysis.`;
 }
 
 function generateInvestmentThesisFallback(data: RequestBody): string {
-  const { investmentType, address } = data;
+  const { investmentType, address, description } = data;
   const location = address.split(",").pop()?.trim() || "the target market";
 
-  return `This **${investmentType.toLowerCase()} investment** capitalizes on strong market fundamentals in *${location}*, including:
+  // Generate more specific investment thesis based on type
+  const investmentLower = investmentType.toLowerCase();
+  let thesisContent = "";
 
-- **Population growth** and job creation driving demand
+  if (
+    investmentLower.includes("development") ||
+    investmentLower.includes("build")
+  ) {
+    thesisContent = `This **ground-up development** opportunity capitalizes on *undersupplied market conditions* in ${location}, where demand significantly outpaces new construction. The strategic approach focuses on:
+
+- **Timing advantage:** Entering during favorable construction costs and pre-leasing market conditions
+- **Location premium:** Prime positioning in a *high-growth demographic corridor* with limited development sites
+- **Design optimization:** Modern amenities and layouts aligned with current tenant preferences
+- **Exit flexibility:** Multiple disposition strategies including hold for income or sale upon stabilization
+
+The development strategy leverages *current market inefficiencies* while positioning for **long-term value appreciation** through quality construction and strategic location selection.`;
+  } else if (
+    investmentLower.includes("flip") ||
+    investmentLower.includes("renovate")
+  ) {
+    thesisContent = `This **value-add opportunity** targets an *underperforming asset* in a strong ${location} submarket, where strategic improvements can unlock significant value appreciation. Our renovation strategy emphasizes:
+
+- **Market repositioning:** Transforming the property to compete in a higher rent tier through targeted improvements
+- **Cost-effective upgrades:** Focus on high-impact, moderate-cost improvements that maximize ROI
+- **Rapid execution:** Streamlined renovation timeline to minimize carrying costs and accelerate returns
+- **Market timing:** Capitalizing on *strong buyer demand* and limited inventory in the target price range
+
+This approach leverages **proven renovation expertise** and *market knowledge* to create value through strategic property transformation and repositioning.`;
+  } else if (
+    investmentLower.includes("rental") ||
+    investmentLower.includes("buy and hold")
+  ) {
+    thesisContent = `This **income-generating acquisition** targets a *cash-flowing asset* in ${location}'s resilient rental market, where strong demographics support consistent tenant demand. The investment strategy focuses on:
+
+- **Stable cash flow:** Immediate income generation with potential for organic rent growth
+- **Market fundamentals:** Strong employment base and *population growth* supporting rental demand
+- **Operational optimization:** Enhancing property management and tenant retention to maximize NOI
+- **Appreciation potential:** Benefiting from **long-term market appreciation** while generating current income
+
+This conservative approach provides *downside protection* through immediate cash flow while capturing **market appreciation** over the hold period.`;
+  } else {
+    thesisContent = `This **strategic real estate investment** capitalizes on strong market fundamentals in *${location}*, including:
+
+- **Population growth** and job creation driving sustained demand
 - **Limited new supply** creating favorable market conditions  
-- **Strategic location** with excellent access to employment centers
-- **Transportation corridors** enhancing long-term value
+- **Strategic location** with excellent access to employment centers and amenities
+- **Transportation infrastructure** enhancing long-term value and accessibility
 
-Our *value-add strategy* will enhance the asset's competitive position while generating **stable cash flow** and **long-term appreciation** for investors through targeted improvements and operational optimization.`;
+Our *value-creation strategy* enhances the asset's competitive position while generating **stable returns** through targeted improvements and operational optimization.`;
+  }
+
+  return thesisContent;
 }
 
 function generateRiskFactorsFallback(data: RequestBody): string[] {
+  const { investmentType, address } = data;
+  const location = address.split(",").pop()?.trim() || "the market";
+
   const baseRisks = [
-    "Interest rate volatility and financing market conditions",
-    "Local market economic downturns affecting demand",
-    "Construction cost overruns and timeline delays",
-    "Regulatory changes and zoning modifications",
-    "Competition from new developments in the area",
+    "Interest rate fluctuations affecting financing costs and property valuations",
+    `Local ${location} market economic downturn impacting demand and rental rates`,
+    "Construction cost inflation and labor shortage delays",
+    "Regulatory changes in zoning, rent control, or tax policies",
+    "Increased competition from new developments or alternative investments",
   ];
 
-  if (data.investmentType.toLowerCase().includes("development")) {
-    baseRisks.push("Construction and development risks");
-    baseRisks.push("Permit and approval delays");
+  const investmentLower = investmentType.toLowerCase();
+
+  if (
+    investmentLower.includes("development") ||
+    investmentLower.includes("build")
+  ) {
+    return [
+      "Development timeline delays due to permitting, weather, or contractor issues",
+      "Construction cost overruns from material price volatility or scope changes",
+      "Pre-leasing challenges in changing market conditions",
+      "Interest rate increases during construction period affecting project feasibility",
+      "Environmental or soil condition discoveries requiring additional remediation",
+    ];
+  } else if (
+    investmentLower.includes("flip") ||
+    investmentLower.includes("renovate")
+  ) {
+    return [
+      "Renovation cost overruns from hidden structural or systems issues",
+      "Extended marketing periods in softening sales market conditions",
+      "Permitting delays for renovation work impacting timeline and carrying costs",
+      "Market preference shifts affecting design choices and target buyer appeal",
+      "Competition from new construction or other renovated properties",
+    ];
+  } else if (
+    investmentLower.includes("rental") ||
+    investmentLower.includes("buy and hold")
+  ) {
+    return [
+      "Tenant turnover and vacancy periods affecting cash flow stability",
+      "Property maintenance and capital expenditure requirements exceeding projections",
+      "Rent control or tenant protection legislation limiting rent growth",
+      "Property management challenges affecting operations and tenant retention",
+      "Market saturation from new rental supply impacting occupancy and rents",
+    ];
   }
 
-  if (data.investmentType.toLowerCase().includes("flip")) {
-    baseRisks.push("Renovation cost overruns");
-    baseRisks.push("Extended marketing periods");
-  }
-
-  return baseRisks.slice(0, 5);
+  return baseRisks;
 }
 
 function generateLocationOverviewFallback(data: RequestBody): string {
   const { address } = data;
   const location = address.split(",").pop()?.trim() || "the target location";
 
-  return `**${location}** is experiencing *robust economic growth* driven by diverse industry sectors and population expansion. 
+  return `**${location}** serves as a **strategic gateway** within the broader metropolitan region, benefiting from *exceptional connectivity* and infrastructure advantages that drive sustained real estate demand.
 
-**Key Economic Drivers:**
-- **Excellent infrastructure** including major highways and public transportation
-- **Proximity to key employment centers** and educational institutions
-- **Recent developments** attracting both businesses and residents
-- **Strong rental demand** with below-average vacancy rates
+**Infrastructure & Accessibility:**
+- **Transportation networks:** Major highway access, public transit connectivity, and proximity to airports
+- **Utility infrastructure:** Robust power grid, high-speed internet, and municipal services
+- **Development pipeline:** Planned infrastructure improvements and municipal investment initiatives
+- **Regional positioning:** Central location within key employment and commercial corridors
 
-The local market demonstrates **exceptional resilience** and continues to show *positive trends* in both rental rates and property values, creating a strong foundation for sustained real estate investment returns.`;
+**Economic Foundation:**
+- **Diverse employment base** across technology, healthcare, finance, and manufacturing sectors
+- **Educational institutions** providing workforce development and housing demand stability
+- **Commercial development** including retail, office, and mixed-use projects driving population growth
+
+The area's *strategic location* and **continuous infrastructure investment** create a foundation for sustained real estate appreciation and rental demand growth.`;
 }
 
 function generateLocationSnapshotFallback(data: RequestBody): string {
   const { address, tone = "Professional" } = data;
   const location = address.split(",").pop()?.trim() || "the target location";
 
-  const toneStyle = {
-    Professional:
-      "demonstrates **strong market fundamentals** with *consistent growth patterns*",
-    Persuasive:
-      "presents an **exceptional opportunity** with *compelling growth indicators*",
-    "Data-Driven":
-      "exhibits **quantifiable growth metrics** and *favorable demographic trends*",
+  // Generate realistic demographic and market data
+  const populationGrowth = (1.5 + Math.random() * 3.5).toFixed(1); // 1.5-5% growth
+  const medianIncome = Math.floor(55000 + Math.random() * 45000); // $55K-$100K
+  const unemploymentRate = (2.5 + Math.random() * 3).toFixed(1); // 2.5-5.5%
+  const housingAppreciation = (4 + Math.random() * 8).toFixed(1); // 4-12% appreciation
+
+  const toneStyles = {
+    Professional: {
+      intro: "demonstrates **solid fundamentals** with *consistent performance metrics*",
+      emphasis: "reliable indicators",
+    },
+    Persuasive: {
+      intro: "showcases **exceptional growth potential** with *compelling demographic advantages*",
+      emphasis: "outstanding opportunities",
+    },
+    "Data-Driven": {
+      intro: "exhibits **quantifiable growth metrics** and *measurable market advantages*",
+      emphasis: "data-supported trends",
+    },
   };
 
-  const style =
-    toneStyle[tone as keyof typeof toneStyle] || toneStyle.Professional;
+  const style = toneStyles[tone as keyof typeof toneStyles] || toneStyles.Professional;
 
-  return `**${location}** ${style}. 
+  return `**${location}** ${style.intro} that position it favorably for real estate investment.
 
-**Market Highlights:**
-- **Growing population base** with diverse demographics
-- **Employment opportunities** across technology, healthcare, and finance sectors
-- **Ongoing infrastructure improvements** enhancing connectivity
-- **Below-average vacancy rates** indicating strong rental demand
+**Key Demographics & Market Metrics:**
+- **Population growth:** ${populationGrowth}% annually, outpacing regional averages
+- **Median household income:** $${medianIncome.toLocaleString()}, supporting strong purchasing power
+- **Employment rate:** ${unemploymentRate}% unemployment, indicating economic stability
+- **Housing appreciation:** ${housingAppreciation}% over the past year, demonstrating market strength
 
-The location's *proximity to major universities* and employment centers ensures **consistent tenant demand** and strong long-term appreciation potential, making it an ideal target for real estate investment.`;
+**Investment-Relevant Trends:**
+- **Millennial influx** driving rental demand and homebuying activity
+- **Remote work adoption** increasing housing demand in suburban markets
+- **Commercial expansion** with new businesses and job creation initiatives
+
+These ${style.emphasis} support **sustained rental demand** and *long-term property value appreciation*, making the market attractive for real estate investment strategies.`;
 }
 
 function generateComparableProperties(data: RequestBody): ComparableProperty[] {
@@ -338,26 +497,39 @@ IMPORTANT: The content will be displayed in sections that already have titles (E
 
 Please provide the following sections in JSON format with markdown-formatted content for rich text display:
 
-1. executiveSummary: A compelling executive summary in a ${tone.toLowerCase()} tone. Use markdown formatting with **bold** for key metrics, *emphasis* for important points, and bullet points for key highlights. Include 3-4 sentences with rich formatting. Do not include any headers - start directly with the content.
+1. executiveSummary: A compelling executive summary in a ${tone.toLowerCase()} tone that focuses on VALUE PROPOSITION and STRATEGY rather than basic deal metrics (those are shown elsewhere). Use markdown formatting with **bold** for key value drivers, *emphasis* for competitive advantages, and bullet points for strategic highlights. Include:
+   - Why this specific opportunity is compelling (market timing, location advantages, etc.)
+   - The value creation strategy and competitive positioning
+   - Key risk mitigation factors and execution capabilities
+   - Do NOT repeat purchase price, equity raise, or IRR - focus on WHY this is a good investment
+   - 3-4 sentences with rich formatting. Do not include any headers - start directly with the content.
 
-2. investmentThesis: A detailed investment thesis explaining why this is a good investment. Use markdown with:
-   - **Bold** for key value propositions
-   - Bullet points for main arguments
-   - *Emphasis* for market advantages
+2. investmentThesis: A detailed investment thesis that goes BEYOND basic market fundamentals to explain the specific strategic advantages and value creation approach. Focus on:
+   - Why THIS specific opportunity stands out from other investments
+   - Unique competitive advantages (timing, location, sponsor expertise, etc.)
+   - Specific value creation strategies and execution plan
+   - Market positioning and differentiation factors
+   Use markdown with:
+   - **Bold** for key strategic advantages
+   - Bullet points for specific value drivers
+   - *Emphasis* for competitive positioning
    - 3-4 well-structured paragraphs
    - No section headers - content only
 
-3. locationOverview: A professional overview of ${location} focusing on real estate demand, population growth, and economic development. Use markdown formatting with:
-   - **Bold** for key location benefits
-   - Bullet points for major economic drivers
-   - *Emphasis* for growth indicators
+3. locationOverview: A comprehensive overview of ${location} focusing on INFRASTRUCTURE, REGIONAL POSITIONING, and ECONOMIC FOUNDATION (not demographics). This is the "big picture" market context. Use markdown formatting with:
+   - **Bold** for infrastructure advantages and regional positioning
+   - Bullet points for transportation, utilities, and development pipeline
+   - *Emphasis* for strategic location benefits
+   - Focus on WHY this location works for real estate (access, infrastructure, economic base)
    - 3-4 paragraphs with rich formatting
    - No section headers - content only
 
-4. locationSnapshot: A ${tone.toLowerCase()} location analysis highlighting growth metrics and demographic trends. Use markdown with:
-   - **Bold** for key statistics
-   - Bullet points for demographic highlights
-   - *Emphasis* for market trends
+4. locationSnapshot: A ${tone.toLowerCase()} DEMOGRAPHIC and MARKET METRICS analysis with specific data points and investment-relevant trends. This is the "investor-focused" market data. Use markdown with:
+   - **Bold** for actual statistics and growth metrics (population growth %, income levels, etc.)
+   - Bullet points for demographic data and market performance
+   - *Emphasis* for trend analysis and market timing factors
+   - Include specific numbers and percentages when possible
+   - Focus on metrics that matter to investors (appreciation rates, rental demand, demographic trends)
    - Rich formatting throughout
    - No section headers - content only
 
@@ -368,7 +540,13 @@ Please provide the following sections in JSON format with markdown-formatted con
    - Keep original content but make it more compelling with rich formatting
    - No section headers - content only
 
-6. riskFactors: Array of 5 relevant risk factors for this type of investment (keep as plain text strings for bullet point display)
+6. riskFactors: Array of 5 specific and relevant risk factors tailored to this investment type and location (not generic risks). Focus on:
+   - Investment-type specific risks (development, renovation, acquisition, etc.)
+   - Location-specific market risks
+   - Timeline and execution risks
+   - Financial and market condition risks
+   - Regulatory or environmental considerations
+   (keep as plain text strings for bullet point display)
 
 7. comparableProperties: Array of 3 comparable properties with realistic addresses, prices around ${formatCurrency(
       purchasePrice
