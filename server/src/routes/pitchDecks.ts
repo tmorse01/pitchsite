@@ -125,10 +125,10 @@ router.delete("/:shareId", async (req: Request, res: Response) => {
       });
     }
 
-    res.json(result);
+    return res.json(result);
   } catch (error) {
     console.error("Error in DELETE /api/pitch-decks/:shareId:", error);
-    res.status(500).json({
+    return res.status(500).json({
       error: "Failed to delete pitch deck",
       message: error instanceof Error ? error.message : "Unknown error",
     });
