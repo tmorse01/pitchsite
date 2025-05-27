@@ -72,20 +72,7 @@ export default function RiskFactors({
         <Title order={2} c="indigo">
           Risk Factors
         </Title>
-
         <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="xl">
-          {/* Traditional Risk Factors */}
-          <Stack gap="xs">
-            <Title order={3} size="h5" c="dimmed">
-              Traditional Risk Assessment
-            </Title>
-            {riskFactors.map((risk, index) => (
-              <Text key={index} size="sm">
-                • {risk}
-              </Text>
-            ))}
-          </Stack>
-
           {/* Risk Analysis Dashboard */}
           <Stack gap="md">
             <Group gap="xs">
@@ -152,35 +139,47 @@ export default function RiskFactors({
                 mx="auto"
               />
             </Box>
-            {/* Risk Mitigation Progress */}
-            <Box>
-              <Text fw={600} size="sm" mb="xs">
-                Risk Mitigation Strategies
-              </Text>
-              <Stack gap="xs">
-                {riskMitigationProgress.map((item, index) => (
-                  <Group key={index} justify="space-between">
-                    <Text size="xs">{item.strategy}</Text>
-                    <Group gap="xs">
-                      <Progress
-                        value={item.progress}
-                        size="sm"
-                        w={100}
-                        color={item.color}
-                      />
-                      <Text size="xs" fw={500}>
-                        {item.progress}%
-                      </Text>
-                    </Group>
-                  </Group>
-                ))}
-              </Stack>
-            </Box>
+
             <Text size="xs" c="dimmed" ta="center" mt="sm">
               * Risk analysis performed by our team of highly trained hamsters
               🐹
             </Text>
           </Stack>
+          <SimpleGrid cols={{ base: 1, lg: 1 }} spacing="xl">
+            {/* Traditional Risk Factors */}
+            <Stack gap="xs">
+              <Title order={3} size="h5" c="dimmed">
+                Traditional Risk Assessment
+              </Title>
+              {riskFactors.map((risk, index) => (
+                <Text key={index} size="sm">
+                  • {risk}
+                </Text>
+              ))}
+            </Stack>
+            {/* Risk Mitigation Progress */}
+            <Stack gap="xs">
+              <Text fw={600} size="sm" mb="xs">
+                Risk Mitigation Strategies
+              </Text>
+              {riskMitigationProgress.map((item, index) => (
+                <Group key={index} justify="space-between">
+                  <Text size="xs">{item.strategy}</Text>
+                  <Group gap="xs">
+                    <Progress
+                      value={item.progress}
+                      size="sm"
+                      w={100}
+                      color={item.color}
+                    />
+                    <Text size="xs" fw={500}>
+                      {item.progress}%
+                    </Text>
+                  </Group>
+                </Group>
+              ))}
+            </Stack>
+          </SimpleGrid>
         </SimpleGrid>
       </Stack>
     </Paper>
