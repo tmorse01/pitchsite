@@ -8,6 +8,7 @@ import dotenv from "dotenv";
 import generateRouter from "./routes/generate.js";
 import pitchDecksRouter from "./routes/pitchDecks.js";
 import { connectToDatabase } from "./db/connection.js";
+import { login } from "./middleware/auth.js";
 
 // Load environment variables
 dotenv.config();
@@ -31,6 +32,9 @@ app.use(express.json());
 // Routes
 app.use("/api", generateRouter);
 app.use("/api/pitch-decks", pitchDecksRouter);
+
+// Direct login route (not under /api prefix)
+app.post("/login", login);
 
 // Health check endpoint
 app.get("/health", async (req: Request, res: Response) => {
@@ -63,6 +67,7 @@ app.get("/", (req: Request, res: Response) => {
     message: "PitchSite API Server",
     version: "1.0.0",
     endpoints: {
+      login: "/login",
       generate: "/api/generate",
       test: "/api/test",
       health: "/health",

@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
 import OpenAI from "openai";
-import { authenticateToken, login } from "../middleware/auth.js";
+import { authenticateToken } from "../middleware/auth.js";
 
 const router = Router();
 
@@ -53,9 +53,6 @@ function getOpenAIClient() {
     apiKey: apiKey,
   });
 }
-
-// Login endpoint - No authentication required
-router.post("/login", login);
 
 // Generate endpoint - Protected with JWT authentication
 router.post(
