@@ -347,22 +347,28 @@ function generateLocationSnapshotFallback(data: RequestBody): string {
 
   const toneStyles = {
     Professional: {
-      intro: "demonstrates **solid fundamentals** with *consistent performance metrics*",
+      intro:
+        "demonstrates **solid fundamentals** with *consistent performance metrics*",
       emphasis: "reliable indicators",
     },
     Persuasive: {
-      intro: "showcases **exceptional growth potential** with *compelling demographic advantages*",
+      intro:
+        "showcases **exceptional growth potential** with *compelling demographic advantages*",
       emphasis: "outstanding opportunities",
     },
     "Data-Driven": {
-      intro: "exhibits **quantifiable growth metrics** and *measurable market advantages*",
+      intro:
+        "exhibits **quantifiable growth metrics** and *measurable market advantages*",
       emphasis: "data-supported trends",
     },
   };
 
-  const style = toneStyles[tone as keyof typeof toneStyles] || toneStyles.Professional;
+  const style =
+    toneStyles[tone as keyof typeof toneStyles] || toneStyles.Professional;
 
-  return `**${location}** ${style.intro} that position it favorably for real estate investment.
+  return `**${location}** ${
+    style.intro
+  } that position it favorably for real estate investment.
 
 **Key Demographics & Market Metrics:**
 - **Population growth:** ${populationGrowth}% annually, outpacing regional averages
@@ -375,7 +381,9 @@ function generateLocationSnapshotFallback(data: RequestBody): string {
 - **Remote work adoption** increasing housing demand in suburban markets
 - **Commercial expansion** with new businesses and job creation initiatives
 
-These ${style.emphasis} support **sustained rental demand** and *long-term property value appreciation*, making the market attractive for real estate investment strategies.`;
+These ${
+    style.emphasis
+  } support **sustained rental demand** and *long-term property value appreciation*, making the market attractive for real estate investment strategies.`;
 }
 
 function generateComparableProperties(data: RequestBody): ComparableProperty[] {
