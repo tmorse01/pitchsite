@@ -12,29 +12,20 @@ import {
   Paper,
   Stack,
   Text,
+  Alert,
 } from "@mantine/core";
 import { useForm } from "@mantine/form";
 import { useNavigate } from "react-router-dom";
-import { generatePitchDeck, testApi } from "../api";
-
-interface FormData {
-  projectName: string;
-  address: string;
-  investmentType: string;
-  purchasePrice: number;
-  totalRaise: number;
-  targetIrr: string;
-  holdPeriod: string;
-  description: string;
-  sponsorBio: string;
-  image: File | null;
-  tone: string;
-}
+import { useGeneratePitchDeck, useTestApi, type FormData } from "../api";
 
 export default function CreatePage() {
   const [active, setActive] = useState(0);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // React Query hooks
+  const generateMutation = useGeneratePitchDeck();
+  const testApiQuery = useTestApi();
+
   const form = useForm<FormData>({
     initialValues: {
       projectName: "Fletcher Landing Waterfront Estate",
@@ -52,7 +43,6 @@ export default function CreatePage() {
       tone: "Professional",
     },
     validate: (values) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const errors: any = {};
 
       if (active === 0) {
@@ -90,52 +80,67 @@ export default function CreatePage() {
   };
 
   const prevStep = () => setActive((current) => Math.max(current - 1, 0));
-
   const handleSubmit = async () => {
     const validation = form.validate();
     if (validation.hasErrors) return;
 
-    setLoading(true);
     try {
-      const pitchData = await generatePitchDeck(form.values);
+      const generatedContent = await generateMutation.mutateAsync(form.values);
       // Store the data in sessionStorage for the preview page
       sessionStorage.setItem(
         "pitchData",
         JSON.stringify({
           formData: form.values,
-          generatedContent: pitchData,
+          generatedContent,
         })
       );
       navigate("/preview");
     } catch (error) {
       console.error("Error generating pitch deck:", error);
-      // Handle error - show notification
-    } finally {
-      setLoading(false);
+      // Error handling is managed by React Query
     }
   };
 
-  const handleTestApi = async () => {
-    try {
-      const result = await testApi();
-      console.log("API Test Result:", result);
-      alert(`API Test Success: ${result.message}`);
-    } catch (error) {
-      console.error("API Test Error:", error);
-      alert(`API Test Failed: ${error}`);
-    }
+  const handleTestApi = () => {
+    testApiQuery.refetch();
   };
   return (
     <Paper shadow="sm" p="xl" radius="md" maw={800} mx="auto">
       <Stack gap="xl">
         <Title order={1} ta="center" c="indigo">
           Create Your Pitch Deck
-        </Title>
+        </Title>{" "}
         <Group justify="center">
-          <Button variant="outline" size="xs" onClick={handleTestApi}>
+          <Button
+            variant="outline"
+            size="xs"
+            onClick={handleTestApi}
+            loading={testApiQuery.isFetching}
+          >
             Test API Connection
           </Button>
         </Group>
+        {/* Show API test results */}
+        {testApiQuery.data && (
+          <Alert color="green" title="API Test Success">
+            {testApiQuery.data.message}
+          </Alert>
+        )}
+        {testApiQuery.error && (
+          <Alert color="red" title="API Test Failed">
+            {testApiQuery.error instanceof Error
+              ? testApiQuery.error.message
+              : "Unknown error"}
+          </Alert>
+        )}
+        {/* Show generation errors */}
+        {generateMutation.error && (
+          <Alert color="red" title="Generation Failed">
+            {generateMutation.error instanceof Error
+              ? generateMutation.error.message
+              : "Unknown error"}
+          </Alert>
+        )}
         <Stepper active={active}>
           <Stepper.Step label="Project Details" description="Basic information">
             <Stack gap="md" mt="xl">
@@ -256,7 +261,7 @@ export default function CreatePage() {
           {active < 3 ? (
             <Button onClick={nextStep}>Next step</Button>
           ) : (
-            <Button onClick={handleSubmit} loading={loading}>
+            <Button onClick={handleSubmit} loading={generateMutation.isPending}>
               Generate Pitch Deck
             </Button>
           )}

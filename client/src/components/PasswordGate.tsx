@@ -11,6 +11,7 @@ import {
   Box,
 } from "@mantine/core";
 import { IconLock } from "@tabler/icons-react";
+import { useLogin, useVerifyToken } from "../api";
 
 interface PasswordGateProps {
   children: React.ReactNode;
@@ -19,35 +20,26 @@ interface PasswordGateProps {
 export default function PasswordGate({ children }: PasswordGateProps) {
   const [password, setPassword] = useState("");
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+
+  // React Query hooks
+  const loginMutation = useLogin();
+  const verifyTokenQuery = useVerifyToken();
+
   // Check if user is already authenticated on component mount
   useEffect(() => {
     const token = localStorage.getItem("pitchsite_auth");
     if (token && token !== "authenticated") {
-      // Verify the token is still valid by making a test API call
-      fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:3001"}/api/test`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      )
-        .then((response) => {
-          if (response.ok) {
-            setIsAuthenticated(true);
-          } else {
-            // Token is invalid, remove it
-            localStorage.removeItem("pitchsite_auth");
-          }
+      // Verify the token is still valid using React Query
+      verifyTokenQuery
+        .refetch()
+        .then(() => {
+          setIsAuthenticated(true);
+          setLoading(false);
         })
         .catch(() => {
-          // Network error or token invalid, remove it
+          // Token is invalid, remove it
           localStorage.removeItem("pitchsite_auth");
-        })
-        .finally(() => {
           setLoading(false);
         });
     } else if (token === "authenticated") {
@@ -57,41 +49,21 @@ export default function PasswordGate({ children }: PasswordGateProps) {
     } else {
       setLoading(false);
     }
-  }, []);
+  }, [verifyTokenQuery]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
 
     try {
-      // Call the login API to get JWT token
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL || "http://localhost:3001"}/api/login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ password }),
-        }
-      );
+      // Use React Query login mutation
+      const result = await loginMutation.mutateAsync(password);
 
-      if (response.ok) {
-        const data = await response.json();
-        // Store JWT token instead of just "authenticated"
-        localStorage.setItem("pitchsite_auth", data.token);
-        setIsAuthenticated(true);
-        setError("");
-      } else {
-        const errorData = await response.json();
-        setError(errorData.message || "Incorrect password. Please try again.");
-        setPassword("");
-      }
+      // Store JWT token
+      localStorage.setItem("pitchsite_auth", result.token);
+      setIsAuthenticated(true);
+      setPassword("");
     } catch (error) {
       console.error("Login error:", error);
-      setError("Connection error. Please try again.");
       setPassword("");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -115,14 +87,14 @@ export default function PasswordGate({ children }: PasswordGateProps) {
               </Title>
               <Text size="sm" c="dimmed" ta="center">
                 Please enter the password to access PitchSite
-              </Text>
-
-              {error && (
+              </Text>{" "}
+              {loginMutation.error && (
                 <Alert color="red" w="100%">
-                  {error}
+                  {loginMutation.error instanceof Error
+                    ? loginMutation.error.message
+                    : "Incorrect password. Please try again."}
                 </Alert>
               )}
-
               <form onSubmit={handleSubmit} style={{ width: "100%" }}>
                 <Stack gap="md">
                   <TextInput
@@ -132,13 +104,17 @@ export default function PasswordGate({ children }: PasswordGateProps) {
                     onChange={(e) => setPassword(e.target.value)}
                     autoFocus
                     w="100%"
-                  />
-                  <Button type="submit" fullWidth size="md">
+                  />{" "}
+                  <Button
+                    type="submit"
+                    fullWidth
+                    size="md"
+                    loading={loginMutation.isPending}
+                  >
                     Access PitchSite
                   </Button>
                 </Stack>
               </form>
-
               <Text size="xs" c="dimmed" ta="center">
                 Hint: The password is "pitch"
               </Text>

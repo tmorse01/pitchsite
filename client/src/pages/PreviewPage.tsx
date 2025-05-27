@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { Text, Button, Group, Stack, SimpleGrid } from "@mantine/core";
+import { Text, Button, Group, Stack, SimpleGrid, Alert } from "@mantine/core";
 import { useNavigate } from "react-router-dom";
-import { savePitchDeck } from "../api";
+import { useSavePitchDeck, type PitchData } from "../api";
 import MarketTrendsChart from "../components/MarketTrendsChart";
 import ComparableProperties from "../components/ComparableProperties";
 import LocationMap from "../components/LocationMap";
@@ -20,56 +20,12 @@ import {
   calculateEstimatedRent,
 } from "../utils/dealMetrics";
 
-interface PitchData {
-  formData: {
-    projectName: string;
-    address: string;
-    investmentType: string;
-    purchasePrice: number;
-    totalRaise: number;
-    targetIrr: string;
-    holdPeriod: string;
-    description: string;
-    sponsorBio: string;
-    image: File | null;
-    tone: string;
-  };
-  generatedContent: {
-    executiveSummary: string;
-    investmentThesis: string;
-    riskFactors: string[];
-    locationOverview: string;
-    locationSnapshot: string;
-    sponsorBio: string;
-    comparableProperties: Array<{
-      address: string;
-      price: string;
-      distance: string;
-      note: string;
-    }>;
-    marketTrends: {
-      priceTrends: Array<{
-        year: string;
-        medianPrice: number;
-        rentGrowth: number;
-        capRate: number;
-      }>;
-      summary: string;
-    };
-    dealMetrics?: {
-      capRate: string;
-      cashOnCashReturn: string;
-      riskScore: number;
-      marketVolatility: string;
-      breakEvenAnalysis: string;
-    };
-  };
-}
-
 export default function PreviewPage() {
   const [pitchData, setPitchData] = useState<PitchData | null>(null);
-  const [sharing, setSharing] = useState(false);
   const navigate = useNavigate();
+
+  // React Query hook
+  const saveMutation = useSavePitchDeck();
 
   useEffect(() => {
     const stored = sessionStorage.getItem("pitchData");
@@ -83,10 +39,13 @@ export default function PreviewPage() {
     if (!pitchData) return;
 
     try {
-      setSharing(true);
-
-      // Save pitch deck to MongoDB
-      const result = await savePitchDeck(pitchData);
+      // Save pitch deck to MongoDB using React Query
+      const result = await saveMutation.mutateAsync({
+        pitchData,
+        options: {
+          isPublic: true,
+        },
+      });
 
       // Navigate to the share page with the generated shareId
       navigate(`/share/${result.shareId}`);
@@ -96,18 +55,26 @@ export default function PreviewPage() {
       const shareId = Math.random().toString(36).substring(2, 8);
       localStorage.setItem(`pitch_${shareId}`, JSON.stringify(pitchData));
       navigate(`/share/${shareId}`);
-    } finally {
-      setSharing(false);
     }
   };
-
   if (!pitchData) {
     return <Text ta="center">Loading...</Text>;
   }
+
   const { formData, generatedContent } = pitchData;
-  const aiMetrics = calculateDealMetrics(formData);
+
   return (
     <>
+      {/* Error Alert */}
+      {saveMutation.error && (
+        <Alert color="red" mb="md">
+          Error sharing pitch deck:{" "}
+          {saveMutation.error instanceof Error
+            ? saveMutation.error.message
+            : "Unknown error"}
+        </Alert>
+      )}
+
       {/* Hero Section */}
       <HeroSection
         formData={formData}
@@ -128,10 +95,19 @@ export default function PreviewPage() {
           <InvestmentThesis
             investmentThesis={generatedContent.investmentThesis}
             animated={false}
-          />
+          />{" "}
           <DealMetrics
-            formData={formData}
-            dealMetrics={aiMetrics}
+            formData={{
+              investmentType: formData.investmentType,
+              purchasePrice: formData.purchasePrice,
+              totalRaise: formData.totalRaise,
+              targetIrr: formData.targetIrr,
+              holdPeriod: formData.holdPeriod,
+            }}
+            dealMetrics={calculateDealMetrics({
+              purchasePrice: formData.purchasePrice,
+              totalRaise: formData.totalRaise,
+            })}
             formatCurrency={formatCurrency}
             getRiskColor={getRiskColor}
             animated={false}
@@ -172,13 +148,13 @@ export default function PreviewPage() {
           title="Sponsor Information"
           content={generatedContent.sponsorBio}
           animated={false}
-        />
-        {/* Contact Footer */}{" "}
+        />{" "}
+        {/* Contact Footer */}
         <ContactFooter
           animated={false}
           onShareDeck={handleShare}
           showShareButton={true}
-          shareLoading={sharing}
+          shareLoading={saveMutation.isPending}
         />
       </Stack>
 

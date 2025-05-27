@@ -25,3 +25,30 @@ export {
   getPitchDeck,
   incrementViewCount,
 } from "./pitchDeckApi";
+
+// Re-export API helpers
+export {
+  apiRequest,
+  apiGet,
+  apiPost,
+  apiPut,
+  apiDelete,
+  apiPatch,
+  handleApiResponse,
+  queryKeys,
+} from "./helpers";
+
+// Re-export React Query setup
+export { queryClient, createQueryKey } from "./queryClient";
+
+// Re-export React Query hooks
+export {
+  usePitchDeck,
+  useSavePitchDeck,
+  useIncrementViewCount,
+  usePrefetchPitchDeck,
+  useTestApi,
+  useGeneratePitchDeck,
+  useLogin,
+  useVerifyToken,
+} from "./hooks";

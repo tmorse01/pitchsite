@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Text,
@@ -9,8 +9,9 @@ import {
   Alert,
   SimpleGrid,
   TextInput,
+  Loader,
 } from "@mantine/core";
-import { getPitchDeck, incrementViewCount } from "../api";
+import { usePitchDeck, useIncrementViewCount } from "../api";
 import MarketTrendsChart from "../components/MarketTrendsChart";
 import ComparableProperties from "../components/ComparableProperties";
 import LocationMap from "../components/LocationMap";
@@ -31,103 +32,35 @@ import {
   calculateEstimatedRent,
 } from "../utils/dealMetrics";
 
-interface PitchData {
-  formData: {
-    projectName: string;
-    address: string;
-    investmentType: string;
-    purchasePrice: number;
-    totalRaise: number;
-    targetIrr: string;
-    holdPeriod: string;
-    description: string;
-    sponsorBio: string;
-    tone: string;
-  };
-  generatedContent: {
-    executiveSummary: string;
-    investmentThesis: string;
-    riskFactors: string[];
-    locationOverview: string;
-    locationSnapshot: string;
-    sponsorBio: string;
-    comparableProperties: Array<{
-      address: string;
-      price: string;
-      distance: string;
-      note: string;
-    }>;
-    marketTrends: {
-      priceTrends: Array<{
-        year: string;
-        medianPrice: number;
-        rentGrowth: number;
-        capRate: number;
-      }>;
-      summary: string;
-    };
-  };
-}
-
 export default function SharePage() {
   const { deckId } = useParams<{ deckId: string }>();
-  const [pitchData, setPitchData] = useState<PitchData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [needsPassword, setNeedsPassword] = useState(false);
   const [password, setPassword] = useState("");
+  const [needsPassword, setNeedsPassword] = useState(false);
   const navigate = useNavigate();
+  const viewCountIncrementedRef = useRef(false);
+
+  // React Query hooks
+  const {
+    data: pitchData,
+    isLoading,
+    error,
+    refetch,
+  } = usePitchDeck(deckId!, password);
+
+  const incrementViewMutation = useIncrementViewCount();
+
+  // Handle password requirement
   useEffect(() => {
-    const fetchPitchDeck = async () => {
-      if (!deckId) {
-        setError("No deck ID provided");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError(null);
-
-        // First try to get the pitch deck
-        const response = await getPitchDeck(deckId, password);
-
-        if (response.isPasswordProtected && !password) {
-          setNeedsPassword(true);
-          setLoading(false);
-          return;
-        }
-
-        setPitchData({
-          formData: response.pitchDeck.formData,
-          generatedContent: response.pitchDeck.generatedContent,
-        });
-
-        // Increment view count (non-blocking)
-        incrementViewCount(deckId).catch(console.warn);
-      } catch (err) {
-        console.error("Error fetching pitch deck:", err);
-
-        // Fallback to localStorage for backwards compatibility
-        try {
-          const stored = localStorage.getItem(`pitch_${deckId}`);
-          if (stored) {
-            setPitchData(JSON.parse(stored));
-          } else {
-            setError(
-              err instanceof Error ? err.message : "Pitch deck not found"
-            );
-          }
-        } catch {
-          setError("Pitch deck not found or expired");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPitchDeck();
-  }, [deckId, password]);
+    if (error instanceof Error && error.message === "PASSWORD_REQUIRED") {
+      setNeedsPassword(true);
+    }
+  }, [error]); // Increment view count when pitch data is successfully loaded (only once)
+  useEffect(() => {
+    if (pitchData && deckId && !viewCountIncrementedRef.current) {
+      viewCountIncrementedRef.current = true;
+      incrementViewMutation.mutate(deckId);
+    }
+  }, [pitchData, deckId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Update document title when pitch data is available
   useEffect(() => {
@@ -142,9 +75,16 @@ export default function SharePage() {
       document.title = "PitchSite";
     };
   }, [pitchData]);
-  if (loading) {
+
+  const handlePasswordSubmit = () => {
+    setNeedsPassword(false);
+    refetch();
+  };
+
+  if (isLoading) {
     return (
       <Stack align="center" justify="center" h="50vh">
+        <Loader size="lg" />
         <Text ta="center" size="lg">
           Loading pitch deck...
         </Text>
@@ -165,29 +105,26 @@ export default function SharePage() {
           onChange={(e) => setPassword(e.target.value)}
           onKeyPress={(e) => {
             if (e.key === "Enter") {
-              // Trigger re-fetch with password
-              setNeedsPassword(false);
-              setLoading(true);
+              handlePasswordSubmit();
             }
           }}
         />
-        <Button
-          onClick={() => {
-            setNeedsPassword(false);
-            setLoading(true);
-          }}
-          mt="sm"
-        >
+        <Button onClick={handlePasswordSubmit} mt="sm">
           Access Deck
         </Button>
       </Stack>
     );
   }
 
-  if (error) {
+  if (
+    error &&
+    !(error instanceof Error && error.message === "PASSWORD_REQUIRED")
+  ) {
     return (
       <Alert color="red" title="Error">
-        <Text>{error}</Text>
+        <Text>
+          {error instanceof Error ? error.message : "Failed to load pitch deck"}
+        </Text>
         <Button mt="md" onClick={() => navigate("/")}>
           Go to Homepage
         </Button>
@@ -228,16 +165,25 @@ export default function SharePage() {
           content={generatedContent.executiveSummary}
           animated={true}
           delay={0.2}
-        />
+        />{" "}
         {/* Investment Thesis & Deal Metrics */}
         <SimpleGrid cols={{ base: 1, md: 2 }} spacing="xl">
           <InvestmentThesis
             investmentThesis={generatedContent.investmentThesis}
             animated={true}
-          />
+          />{" "}
           <DealMetrics
-            formData={formData}
-            dealMetrics={calculateDealMetrics(formData)}
+            formData={{
+              investmentType: formData.investmentType,
+              purchasePrice: formData.purchasePrice,
+              totalRaise: formData.totalRaise,
+              targetIrr: formData.targetIrr,
+              holdPeriod: formData.holdPeriod,
+            }}
+            dealMetrics={calculateDealMetrics({
+              purchasePrice: formData.purchasePrice,
+              totalRaise: formData.totalRaise,
+            })}
             formatCurrency={formatCurrency}
             getRiskColor={getRiskColor}
             animated={true}
@@ -261,7 +207,6 @@ export default function SharePage() {
           riskFactors={generatedContent.riskFactors}
           animated={true}
         />
-
         {/* Investment Description */}
         {/* Location Map with Zillow Links */}
         <AnimatedWrapper animated={true} delay={0.2}>
