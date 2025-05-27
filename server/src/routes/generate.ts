@@ -387,30 +387,61 @@ These ${
 }
 
 function generateComparableProperties(data: RequestBody): ComparableProperty[] {
-  const { purchasePrice } = data;
+  const { purchasePrice, investmentType } = data;
 
-  // Generate realistic comparable prices based on the purchase price
+  // Simplified fallback - this should rarely be used since AI will generate better comps
   const basePrice = purchasePrice;
-  const comps = [
-    {
-      address: `${Math.floor(Math.random() * 999) + 100} Oak Street`,
-      price: formatCurrency(basePrice * (0.9 + Math.random() * 0.2)),
-      distance: `${(Math.random() * 0.8 + 0.2).toFixed(1)} miles`,
-      note: "Similar square footage and amenities",
-    },
-    {
-      address: `${Math.floor(Math.random() * 999) + 100} Pine Avenue`,
-      price: formatCurrency(basePrice * (0.85 + Math.random() * 0.3)),
-      distance: `${(Math.random() * 1.2 + 0.3).toFixed(1)} miles`,
-      note: "Comparable age and condition",
-    },
-    {
-      address: `${Math.floor(Math.random() * 999) + 100} Maple Drive`,
-      price: formatCurrency(basePrice * (0.95 + Math.random() * 0.15)),
-      distance: `${(Math.random() * 0.6 + 0.1).toFixed(1)} miles`,
-      note: "Similar lot size and finishes",
-    },
-  ];
+  const priceVariations = [0.92, 0.98, 1.04];
+
+  const investmentNotes = {
+    development: [
+      "Recently completed new construction with modern amenities",
+      "Similar unit mix and target demographic appeal",
+      "Comparable development timeline and market positioning",
+    ],
+    flip: [
+      "Recently renovated with high-end finishes",
+      "Similar renovation scope and market repositioning",
+      "Comparable square footage and lot characteristics",
+    ],
+    rental: [
+      "Strong rental history with consistent occupancy",
+      "Similar cap rate and cash flow potential",
+      "Comparable property management and tenant profile",
+    ],
+    default: [
+      "Similar square footage and amenities",
+      "Comparable age and condition",
+      "Similar lot size and finishes",
+    ],
+  };
+
+  const investmentLower = investmentType.toLowerCase();
+  let notes = investmentNotes.default;
+  if (
+    investmentLower.includes("development") ||
+    investmentLower.includes("build")
+  ) {
+    notes = investmentNotes.development;
+  } else if (
+    investmentLower.includes("flip") ||
+    investmentLower.includes("renovate")
+  ) {
+    notes = investmentNotes.flip;
+  } else if (
+    investmentLower.includes("rental") ||
+    investmentLower.includes("buy and hold")
+  ) {
+    notes = investmentNotes.rental;
+  }
+
+  // Basic fallback comps (AI should provide better ones)
+  const comps = priceVariations.map((variation, index) => ({
+    address: `Comparable Property ${index + 1}`,
+    price: formatCurrency(basePrice * variation),
+    distance: `${(0.5 + index * 0.3).toFixed(1)} miles`,
+    note: notes[index],
+  }));
 
   return comps;
 }
@@ -556,9 +587,23 @@ Please provide the following sections in JSON format with markdown-formatted con
    - Regulatory or environmental considerations
    (keep as plain text strings for bullet point display)
 
-7. comparableProperties: Array of 3 comparable properties with realistic addresses, prices around ${formatCurrency(
-      purchasePrice
-    )}, distances, and notes (keep as objects for structured display)
+7. comparableProperties: Generate 3 realistic comparable properties based on the ACTUAL location of ${address}. Research and understand this specific market area to provide:
+   - **Real street addresses** that would actually exist in or near ${
+     address.split(",")[0] || address
+   } (use actual street patterns, naming conventions, and geographic context for that area)
+   - **Market-accurate pricing** around ${formatCurrency(
+     purchasePrice
+   )} (±10-15% variation based on actual market conditions)
+   - **Realistic distances** (0.3-1.2 miles for true comparables in that market)
+   - **Investment-focused analysis** relevant to ${investmentType} strategy with specific details about:
+     * Property features that matter to investors (square footage, lot size, recent sales/renovations)
+     * Market positioning and rental potential (if applicable)
+     * Condition, age, and recent improvements
+     * Why each property is truly comparable to the subject property
+   
+   IMPORTANT: Do not use generic street names like "Oak Street" or "Main Avenue". Research the actual ${address} area and generate addresses that would realistically exist in that specific location with proper street naming patterns for that region.
+   
+   Format as: [{"address": "actual street address for the area", "price": "$XXX,XXX", "distance": "X.X miles", "note": "detailed comparable analysis"}]
 
 Return only a valid JSON object with these fields. The text fields should contain markdown formatting for rich display but NO section headers. Do not wrap the response in markdown code blocks - return raw JSON only.`;
 
@@ -576,7 +621,7 @@ Return only a valid JSON object with these fields. The text fields should contai
           content: prompt,
         },
       ],
-      max_tokens: 800,
+      max_tokens: 1200,
       temperature: 0.7,
     });
 
@@ -610,9 +655,7 @@ Return only a valid JSON object with these fields. The text fields should contai
       console.error("Raw AI Response:", aiResponse);
       console.error("Extracted JSON String:", jsonString);
       throw new Error(`Failed to parse AI response as JSON: ${parseError}`);
-    }
-
-    // Combine AI content with generated data
+    } // Combine AI content with generated data
     return {
       executiveSummary:
         aiContent.executiveSummary || generateExecutiveSummaryFallback(data),

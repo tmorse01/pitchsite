@@ -101,7 +101,6 @@ export default function HeroSection({
                   }}
                   style={{ borderRadius: "var(--mantine-radius-xl)" }}
                 >
-                  {" "}
                   <Badge
                     size="xl"
                     variant="filled"
@@ -122,7 +121,6 @@ export default function HeroSection({
                   }
                   transition={{ delay: 0.6, duration: 0.8 }}
                 >
-                  {" "}
                   <Title
                     order={1}
                     size="h1"
@@ -277,7 +275,7 @@ export default function HeroSection({
                   </ItemWrapper>
                 </Group>
               </ItemWrapper>
-            </Stack>{" "}
+            </Stack>
             {/* Investment Progress Bar */}
             {animated && !shouldReduceMotion && (
               <motion.div
