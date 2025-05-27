@@ -86,12 +86,12 @@ export default function RiskFactors({
             ))}
           </Stack>
 
-          {/* Silly Risk Analysis Dashboard */}
+          {/* Risk Analysis Dashboard */}
           <Stack gap="md">
             <Group gap="xs">
               <IconChartPie size={20} color="var(--mantine-color-indigo-6)" />
               <Title order={3} size="h5" c="indigo">
-                Silly Risk Analysis Dashboard™
+                Risk Analysis Dashboard™
               </Title>
               <Badge variant="light" color="grape" size="sm">
                 Very Scientific
@@ -201,25 +201,6 @@ export default function RiskFactors({
             </Title>
 
             <SimpleGrid cols={{ base: 1, lg: 2 }} spacing="xl">
-              {/* Traditional Risk Factors */}
-              <motion.div
-                variants={listVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true, amount: 0.3 }}
-              >
-                <Stack gap="xs">
-                  <Title order={3} size="h5" c="dimmed">
-                    Traditional Risk Assessment
-                  </Title>
-                  {riskFactors.map((risk, index) => (
-                    <motion.div key={index} variants={listItemVariants}>
-                      <Text size="sm">• {risk}</Text>
-                    </motion.div>
-                  ))}
-                </Stack>
-              </motion.div>
-
               {/* Silly Risk Analysis Dashboard */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -316,45 +297,6 @@ export default function RiskFactors({
                       />
                     </Box>
                   </motion.div>
-                  {/* Risk Mitigation Progress */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: 0.9 }}
-                  >
-                    <Box>
-                      <Text fw={600} size="sm" mb="xs">
-                        Risk Mitigation Strategies
-                      </Text>
-                      <Stack gap="xs">
-                        {riskMitigationProgress.map((item, index) => (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0, x: -20 }}
-                            whileInView={{ opacity: 1, x: 0 }}
-                            viewport={{ once: true }}
-                            transition={{ delay: 1.0 + index * 0.1 }}
-                          >
-                            <Group justify="space-between">
-                              <Text size="xs">{item.strategy}</Text>
-                              <Group gap="xs">
-                                <Progress
-                                  value={item.progress}
-                                  size="sm"
-                                  w={100}
-                                  color={item.color}
-                                />
-                                <Text size="xs" fw={500}>
-                                  {item.progress}%
-                                </Text>
-                              </Group>
-                            </Group>
-                          </motion.div>
-                        ))}
-                      </Stack>
-                    </Box>
-                  </motion.div>
                   <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
@@ -368,6 +310,65 @@ export default function RiskFactors({
                   </motion.div>
                 </Stack>
               </motion.div>
+              <SimpleGrid cols={{ base: 1, lg: 1 }} spacing="xl">
+                {/* Traditional Risk Factors */}
+                <motion.div
+                  variants={listVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.3 }}
+                >
+                  <Stack gap="xs">
+                    <Title order={3} size="h5" c="dimmed">
+                      Traditional Risk Assessment
+                    </Title>
+                    {riskFactors.map((risk, index) => (
+                      <motion.div key={index} variants={listItemVariants}>
+                        <Text size="sm">• {risk}</Text>
+                      </motion.div>
+                    ))}
+                  </Stack>
+                </motion.div>
+                {/* Risk Mitigation Progress */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.9 }}
+                >
+                  <Box>
+                    <Text fw={600} size="sm" mb="xs">
+                      Risk Mitigation Strategies
+                    </Text>
+                    <Stack gap="xs">
+                      {riskMitigationProgress.map((item, index) => (
+                        <motion.div
+                          key={index}
+                          initial={{ opacity: 0, x: -20 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: 1.0 + index * 0.1 }}
+                        >
+                          <Group justify="space-between">
+                            <Text size="xs">{item.strategy}</Text>
+                            <Group gap="xs">
+                              <Progress
+                                value={item.progress}
+                                size="sm"
+                                w={100}
+                                color={item.color}
+                              />
+                              <Text size="xs" fw={500}>
+                                {item.progress}%
+                              </Text>
+                            </Group>
+                          </Group>
+                        </motion.div>
+                      ))}
+                    </Stack>
+                  </Box>
+                </motion.div>
+              </SimpleGrid>
             </SimpleGrid>
           </Stack>
         </Paper>
