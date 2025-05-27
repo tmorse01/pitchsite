@@ -6,6 +6,8 @@ import express, {
 import cors from "cors";
 import dotenv from "dotenv";
 import generateRouter from "./routes/generate.js";
+import pitchDecksRouter from "./routes/pitchDecks.js";
+import { connectToDatabase } from "./db/connection.js";
 
 // Load environment variables
 dotenv.config();
@@ -28,6 +30,7 @@ app.use(express.json());
 
 // Routes
 app.use("/api", generateRouter);
+app.use("/api/pitch-decks", pitchDecksRouter);
 
 // Health check endpoint
 app.get("/health", (req: Request, res: Response) => {
@@ -47,6 +50,7 @@ app.get("/", (req: Request, res: Response) => {
       generate: "/api/generate",
       test: "/api/test",
       health: "/health",
+      pitchDecks: "/api/pitch-decks",
     },
   });
 });
@@ -68,7 +72,7 @@ app.use("*", (req: Request, res: Response) => {
   res.status(404).json({ error: "Endpoint not found" });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 PitchSite API Server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || "development"}`);
   console.log(
@@ -76,4 +80,16 @@ app.listen(PORT, () => {
   );
   console.log(`🔐 App Password: ${process.env.APP_PASSWORD || "Not Set"}`);
   console.log(`🔑 JWT Secret: ${process.env.JWT_SECRET ? "Set" : "Not Set"}`);
+
+  // Connect to MongoDB
+  try {
+    console.log(`🗄️  MongoDB: Connecting...`);
+    await connectToDatabase();
+    console.log(`🗄️  MongoDB: Connected successfully`);
+  } catch (error) {
+    console.error(`❌ MongoDB: Connection failed`, error);
+    if (process.env.NODE_ENV === "production") {
+      process.exit(1);
+    }
+  }
 });

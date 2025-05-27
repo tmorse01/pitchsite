@@ -8,7 +8,9 @@ import {
   Box,
   Alert,
   SimpleGrid,
+  TextInput,
 } from "@mantine/core";
+import { getPitchDeck, incrementViewCount } from "../api/client";
 import MarketTrendsChart from "../components/MarketTrendsChart";
 import ComparableProperties from "../components/ComparableProperties";
 import LocationMap from "../components/LocationMap";
@@ -71,16 +73,61 @@ export default function SharePage() {
   const { deckId } = useParams<{ deckId: string }>();
   const [pitchData, setPitchData] = useState<PitchData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [needsPassword, setNeedsPassword] = useState(false);
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
   useEffect(() => {
-    if (deckId) {
-      const stored = localStorage.getItem(`pitch_${deckId}`);
-      if (stored) {
-        setPitchData(JSON.parse(stored));
+    const fetchPitchDeck = async () => {
+      if (!deckId) {
+        setError("No deck ID provided");
+        setLoading(false);
+        return;
       }
-    }
-    setLoading(false);
-  }, [deckId]);
+
+      try {
+        setLoading(true);
+        setError(null);
+
+        // First try to get the pitch deck
+        const response = await getPitchDeck(deckId, password);
+
+        if (response.isPasswordProtected && !password) {
+          setNeedsPassword(true);
+          setLoading(false);
+          return;
+        }
+
+        setPitchData({
+          formData: response.pitchDeck.formData,
+          generatedContent: response.pitchDeck.generatedContent,
+        });
+
+        // Increment view count (non-blocking)
+        incrementViewCount(deckId).catch(console.warn);
+      } catch (err) {
+        console.error("Error fetching pitch deck:", err);
+
+        // Fallback to localStorage for backwards compatibility
+        try {
+          const stored = localStorage.getItem(`pitch_${deckId}`);
+          if (stored) {
+            setPitchData(JSON.parse(stored));
+          } else {
+            setError(
+              err instanceof Error ? err.message : "Pitch deck not found"
+            );
+          }
+        } catch {
+          setError("Pitch deck not found or expired");
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPitchDeck();
+  }, [deckId, password]);
 
   // Update document title when pitch data is available
   useEffect(() => {
@@ -95,9 +142,57 @@ export default function SharePage() {
       document.title = "PitchSite";
     };
   }, [pitchData]);
-
   if (loading) {
-    return <Text ta="center">Loading...</Text>;
+    return (
+      <Stack align="center" justify="center" h="50vh">
+        <Text ta="center" size="lg">
+          Loading pitch deck...
+        </Text>
+      </Stack>
+    );
+  }
+
+  if (needsPassword) {
+    return (
+      <Stack align="center" justify="center" h="50vh" maw={400} mx="auto">
+        <Text ta="center" size="lg" mb="md">
+          This pitch deck is password protected
+        </Text>
+        <TextInput
+          placeholder="Enter password"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onKeyPress={(e) => {
+            if (e.key === "Enter") {
+              // Trigger re-fetch with password
+              setNeedsPassword(false);
+              setLoading(true);
+            }
+          }}
+        />
+        <Button
+          onClick={() => {
+            setNeedsPassword(false);
+            setLoading(true);
+          }}
+          mt="sm"
+        >
+          Access Deck
+        </Button>
+      </Stack>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert color="red" title="Error">
+        <Text>{error}</Text>
+        <Button mt="md" onClick={() => navigate("/")}>
+          Go to Homepage
+        </Button>
+      </Alert>
+    );
   }
 
   if (!pitchData) {

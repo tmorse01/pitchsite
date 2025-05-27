@@ -9,6 +9,7 @@ interface ContactFooterProps {
   onContactSponsor?: () => void;
   onShareDeck?: () => void;
   showShareButton?: boolean;
+  shareLoading?: boolean;
 }
 
 export default function ContactFooter({
@@ -17,6 +18,7 @@ export default function ContactFooter({
   onContactSponsor,
   onShareDeck,
   showShareButton = true,
+  shareLoading = false,
 }: ContactFooterProps) {
   const shouldReduceMotion = useReducedMotion();
 
@@ -34,10 +36,15 @@ export default function ContactFooter({
                 <Button variant="filled" size="lg" onClick={onContactSponsor}>
                   Contact Sponsor
                 </Button>
-              </motion.div>
+              </motion.div>{" "}
               {showShareButton && (
                 <motion.div {...buttonHover}>
-                  <Button variant="outline" size="lg" onClick={onShareDeck}>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    onClick={onShareDeck}
+                    loading={shareLoading}
+                  >
                     Share This Deck
                   </Button>
                 </motion.div>
@@ -47,9 +54,14 @@ export default function ContactFooter({
             <>
               <Button variant="filled" size="lg" onClick={onContactSponsor}>
                 Contact Sponsor
-              </Button>
+              </Button>{" "}
               {showShareButton && (
-                <Button variant="outline" size="lg" onClick={onShareDeck}>
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={onShareDeck}
+                  loading={shareLoading}
+                >
                   Share This Deck
                 </Button>
               )}
