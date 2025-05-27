@@ -14,14 +14,20 @@ export default function LocationMap({ address }: LocationMapProps) {
       address
     )}`;
   };
-
   const generateMapEmbedUrl = (address: string) => {
-    // For now, we'll use a fallback since we don't have a Google Maps API key
-    // In production, you would use:
-    // `https://www.google.com/maps/embed/v1/place?key=YOUR_API_KEY&q=${encodeURIComponent(address)}`
-    return `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3048.8587!2d-97.7431!3d30.2672!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzDCsDE2JzAyLjAiTiA5N8KwNDQnMzUuMiJX!5e0!3m2!1sen!2sus!4v1234567890!5m2!1sen!2sus&q=${encodeURIComponent(
-      address
-    )}`;
+    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+    if (apiKey) {
+      // Use the official Google Maps Embed API with the API key
+      return `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodeURIComponent(
+        address
+      )}`;
+    } else {
+      // Fallback to the basic embed URL without API key
+      return `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3048.8587!2d-97.7431!3d30.2672!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzDCsDE2JzAyLjAiTiA5N8KwNDQnMzUuMiJX!5e0!3m2!1sen!2sus!4v1234567890!5m2!1sen!2sus&q=${encodeURIComponent(
+        address
+      )}`;
+    }
   };
 
   return (
